@@ -23,10 +23,12 @@ THE SOFTWARE.
 package com.agafua.syslog;
 
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.*;
+import java.util.logging.Handler;
+import java.util.logging.LogManager;
+import java.util.logging.LogRecord;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Implementation of java.util.logging.Handler for syslog protocol RFC 3164.

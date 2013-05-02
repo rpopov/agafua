@@ -46,7 +46,6 @@ class TcpSender implements Runnable {
         this.blockingQueue = blockingQueue;
     }
 
-    @Override
     public void run() {
         worker.start();
     }
@@ -56,7 +55,6 @@ class TcpSender implements Runnable {
         private Socket socket;
         private OutputStream os;
 
-        @Override
         public void run() {
             while (true) {
                 try {
