@@ -26,11 +26,16 @@ package com.agafua.syslog;
  * Message for sending by worker implementation.
  */
 class Message {
-	private static final int MESSAGE_SIZE = 65536;
+	private final int maxMsgSize;
 	private static final byte NON_ASCII_SYMBOL = (byte) '.';
 	private static final byte LF_SYMBOL = (byte) '\\';
-	private byte[] value = new byte[MESSAGE_SIZE];
+	private byte[] value;
 	private int pos = 0;
+
+	protected Message(int maxMessageSize) {
+		this.maxMsgSize = maxMessageSize;
+		this.value = new byte[maxMsgSize];
+	}
 
 	public int getLength() {
 		return pos;
@@ -42,17 +47,17 @@ class Message {
 
 	public void print(String s) {
 		for (int i = 0; i < s.length(); i++) {
-			if (pos >= MESSAGE_SIZE) {
+			if (pos >= this.maxMsgSize) {
 				break;
 			}
 			char c = s.charAt(i);
-			//if (c >= 32 && c <= 126) {
-				value[pos] = (byte) c;
-//			} else if (c == 10) {
-//				value[pos] = LF_SYMBOL;
-//			} else {
-//				value[pos] = NON_ASCII_SYMBOL;
-//			}
+			// if (c >= 32 && c <= 126) {
+			value[pos] = (byte) c;
+			// } else if (c == 10) {
+			// value[pos] = LF_SYMBOL;
+			// } else {
+			// value[pos] = NON_ASCII_SYMBOL;
+			// }
 			pos++;
 		}
 	}

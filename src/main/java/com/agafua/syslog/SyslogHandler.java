@@ -46,15 +46,20 @@ public class SyslogHandler extends Handler {
 	private static final int MIN_PORT = 0;
 	private static final int MAX_PORT = 65535;
 
+	private static final int DEFAULT_MAX_MESSAGE_SIZE = 65535;
+
 	private static final String TRANSPORT_PROPERTY = "transport";
-	private static final String LOCAL_HOSTNAME_PROPERTY = "local.hostname";
-	private static final String REMOTE_HOSTNAME_PROPERTY = "remote.hostname";
+	private static final String LOCAL_HOSTNAME_PROPERTY = "localHostname";
+	private static final String REMOTE_HOSTNAME_PROPERTY = "remoteHostname";
 	private static final String PORT_PROPERTY = "port";
 	private static final String FACILITY_PROPERTY = "facility";
+	private static final String MAX_MESSAGE_SIZE_PROPERTY = "maxMsgSize";
 	private static final String DAEMON_MODE_PROPERTY = "daemon";
 
 	private final String localHostName;
 	private final String remoteHostName;
+	private final int maxMessageSize;
+
 	private final int port;
 	private final Facility facility;
 	private final Transport transport;
@@ -74,6 +79,7 @@ public class SyslogHandler extends Handler {
 		remoteHostName = parseRemoteHostName();
 		port = parsePort();
 		facility = parseFacility();
+		maxMessageSize = parseMaxMessageSize();
 		setFormatter(new SimpleFormatter());
 		if (Transport.TCP.equals(transport)) {
 			worker = new Thread(new TcpSender(remoteHostName, port,
@@ -91,7 +97,7 @@ public class SyslogHandler extends Handler {
 			return;
 		}
 		try {
-			Message message = new Message();
+			Message message = new Message(getMaxMessageSize());
 			String pri = adaptor.adaptPriority(record, facility);
 			message.print(pri);
 			message.print(VERSION);
@@ -104,9 +110,10 @@ public class SyslogHandler extends Handler {
 			message.print(" ");
 			String msg = getFormatter().format(record);
 			message.print(msg);
+			System.out.println(msg);
 			blockingQueue.offer(message);
 		} catch (Throwable t) {
-			//Not nice! TODO: REMOVE OR CHECK ALTERNATIVES!
+			// Not nice! TODO: REMOVE OR CHECK ALTERNATIVES!
 			t.printStackTrace();
 		}
 	}
@@ -140,6 +147,10 @@ public class SyslogHandler extends Handler {
 
 	public String getFacility() {
 		return facility.name();
+	}
+	
+	public int getMaxMessageSize() {
+		return maxMessageSize;
 	}
 
 	private Transport parseTransport() {
@@ -176,6 +187,25 @@ public class SyslogHandler extends Handler {
 			return hostNameValue;
 		}
 		return LOCALHOST;
+	}
+
+	private int parseMaxMessageSize() {
+		String maxMsgSizeProperty = SyslogHandler.class.getName() + "."
+				+ MAX_MESSAGE_SIZE_PROPERTY;
+		String maxMsgSize = LogManager.getLogManager().getProperty(
+				maxMsgSizeProperty);
+		if (maxMsgSize != null) {
+			Integer p = null;
+			try {
+				p = Integer.parseInt(maxMsgSizeProperty);
+			} catch (NumberFormatException e) {
+
+			}
+			if (p != null) {
+				return p;
+			}
+		}
+		return DEFAULT_MAX_MESSAGE_SIZE;
 	}
 
 	private int parsePort() {
