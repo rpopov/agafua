@@ -22,7 +22,8 @@ THE SOFTWARE.
 
 package com.agafua.syslog;
 
-import java.net.InetAddress;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.net.UnknownHostException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -53,9 +54,12 @@ public class SyslogHandler extends Handler {
 	private static final String REMOTE_HOSTNAME_PROPERTY = "remoteHostname";
 	private static final String PORT_PROPERTY = "port";
 	private static final String FACILITY_PROPERTY = "facility";
+	private static final String APPLICATION_ID = "applicationId";
 	private static final String MAX_MESSAGE_SIZE_PROPERTY = "maxMsgSize";
 	private static final String DAEMON_MODE_PROPERTY = "daemon";
 
+	private String processId;
+	private final String applicationId;
 	private final String localHostName;
 	private final String remoteHostName;
 	private final int maxMessageSize;
@@ -77,6 +81,7 @@ public class SyslogHandler extends Handler {
 		transport = parseTransport();
 		localHostName = parseLocalHostName();
 		remoteHostName = parseRemoteHostName();
+		applicationId = parseApplicationId();
 		port = parsePort();
 		facility = parseFacility();
 		maxMessageSize = parseMaxMessageSize();
@@ -97,17 +102,26 @@ public class SyslogHandler extends Handler {
 			return;
 		}
 		try {
-			Message message = new Message(getMaxMessageSize());
+			Message message = new MessageRFC5424(getMaxMessageSize());
 			String pri = adaptor.adaptPriority(record, facility);
-			message.print(pri);
-			message.print(VERSION);
-			message.print(" ");
+			message.print(pri); // ABNF RFC5424: PRI
+			message.print(VERSION); // ABNF RFC5424: VERSION
+			message.print(" "); // ABNF RFC5424: SP
 			String timestamp = adaptor.adaptTimeStamp(record);
-			message.print(timestamp);
-			message.print(" ");
+			message.print(timestamp); // ABNF RFC5424: TIMESTAMP
+			message.print(" "); // ABNF RFC5424: SP
 			String host = getLocalHostName();
-			message.print(host);
-			message.print(" ");
+			message.print(host); // ABNF RFC5424: HOSTNAME
+			message.print(" "); // ABNF RFC5424: SP
+			String app = getApplicationName();
+			message.print(app); // ABNF RFC5424: APP-NAME
+			message.print(" "); // ABNF RFC5424: SP
+			String procId = getProcessId();
+			message.print(procId); // ABNF RFC5424: PROCID
+			message.print(" "); // ABNF RFC5424: SP
+			String msgId = getMessageId();
+			message.print(msgId); // ABNF RFC5424: MSGID
+			message.print(" "); // ABNF RFC5424: SP
 			String msg = getFormatter().format(record);
 			message.print(msg);
 			System.out.println(message);
@@ -116,6 +130,42 @@ public class SyslogHandler extends Handler {
 			// Not nice! TODO: REMOVE OR CHECK ALTERNATIVES!
 			t.printStackTrace();
 		}
+	}
+
+	private String getMessageId() {
+
+		return "-";
+	}
+
+	private String getProcessId() {
+		if (this.processId == null) {
+			// lazy loading - do this only once:
+
+			try {
+				// This might not work on any operating system.
+				// We return "-" of not successful.
+				RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
+
+				String jvmName = bean.getName();
+				String pid = jvmName.split("@")[0];
+
+				if (pid != null && pid.length() > 0) {
+					this.processId = pid;
+				} else {
+					this.processId = "-";
+				}
+
+			} catch (Exception e) {
+				// we're very carefully here...
+				this.processId = "-";
+			}
+		}
+
+		return this.processId;
+	}
+
+	private String getApplicationName() {
+		return this.applicationId;
 	}
 
 	public String getLocalHostName() {
@@ -148,7 +198,7 @@ public class SyslogHandler extends Handler {
 	public String getFacility() {
 		return facility.name();
 	}
-	
+
 	public int getMaxMessageSize() {
 		return maxMessageSize;
 	}
@@ -176,6 +226,18 @@ public class SyslogHandler extends Handler {
 		}
 
 		return getMyHostName();
+	}
+
+	private String parseApplicationId() {
+		String appIdProperty = SyslogHandler.class.getName() + "."
+				+ APPLICATION_ID;
+		String hostNameValue = LogManager.getLogManager().getProperty(
+				appIdProperty);
+		if (hostNameValue != null && hostNameValue.length() > 0) {
+			return hostNameValue;
+		}
+
+		return "-";
 	}
 
 	private String parseRemoteHostName() {
