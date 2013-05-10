@@ -106,7 +106,8 @@ public class SyslogHandler extends Handler {
 			message.print(msg);
 			blockingQueue.offer(message);
 		} catch (Throwable t) {
-
+			//Not nice! TODO: REMOVE OR CHECK ALTERNATIVES!
+			t.printStackTrace();
 		}
 	}
 
