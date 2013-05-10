@@ -70,7 +70,7 @@ public class SyslogHandler extends Handler {
 	private Thread worker;
 	private volatile String myHostName;
 
-	private Adaptor adaptor = new Adaptor();
+	private Adaptor adaptor = new AdaptorRFC5424();
 
 	public SyslogHandler() {
 		super();
@@ -110,7 +110,7 @@ public class SyslogHandler extends Handler {
 			message.print(" ");
 			String msg = getFormatter().format(record);
 			message.print(msg);
-			System.out.println(msg);
+			System.out.println(message);
 			blockingQueue.offer(message);
 		} catch (Throwable t) {
 			// Not nice! TODO: REMOVE OR CHECK ALTERNATIVES!
