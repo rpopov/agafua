@@ -35,9 +35,7 @@ class AdaptorRFC5424 implements Adaptor {
 
 		String timestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 				.format(logDate);
-		System.err.println(timestamp);
 		timestamp = timestamp.replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2");
-		System.err.println(timestamp);
 		return timestamp;
 	}
 
