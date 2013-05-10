@@ -99,7 +99,7 @@ public class SyslogHandler extends Handler {
 			String timestamp = adaptor.adaptTimeStamp(record);
 			message.print(timestamp);
 			message.print(" ");
-			String host = getMyHostName();
+			String host = getLocalHostName();
 			message.print(host);
 			message.print(" ");
 			String msg = getFormatter().format(record);
@@ -108,6 +108,10 @@ public class SyslogHandler extends Handler {
 		} catch (Throwable t) {
 
 		}
+	}
+
+	public String getLocalHostName() {
+		return localHostName;
 	}
 
 	@Override
