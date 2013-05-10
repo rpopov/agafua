@@ -5,16 +5,7 @@
 	<artifactId>agafua</artifactId>
 	<version>0.2.ui1-SNAPSHOT</version>
 	<name>Syslog handler for java.commons.logging</name>
-	<build>
-		<sourceDirectory>src</sourceDirectory>
-		<resources>
-			<resource>
-				<directory>src</directory>
-				<excludes>
-					<exclude>**/*.java</exclude>
-				</excludes>
-			</resource>
-		</resources>
+	<build>	
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
