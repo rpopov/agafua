@@ -159,6 +159,7 @@ public class SyslogHandler extends Handler {
 				// we're very carefully here...
 				this.processId = "-";
 			}
+			processId = replaceNonUsAsciiAndTrim(processId, 128);
 		}
 
 		return this.processId;
@@ -231,13 +232,22 @@ public class SyslogHandler extends Handler {
 	private String parseApplicationId() {
 		String appIdProperty = SyslogHandler.class.getName() + "."
 				+ APPLICATION_ID;
-		String hostNameValue = LogManager.getLogManager().getProperty(
+		String appIdValue = LogManager.getLogManager().getProperty(
 				appIdProperty);
-		if (hostNameValue != null && hostNameValue.length() > 0) {
-			return hostNameValue;
+		if (appIdValue != null && appIdValue.length() > 0) {
+			// The RFC allows max. 48 chars for the app id, so cut it on demand
+			appIdValue = replaceNonUsAsciiAndTrim(appIdValue, 48);
+			return appIdValue;
 		}
 
 		return "-";
+	}
+
+	private String replaceNonUsAsciiAndTrim(String s, int maxLength) {
+		s = s.substring(0, Math.min(s.length(), maxLength));
+
+		// Only ASCII-7 chars are allowed. So replace all others:
+		return s.replaceAll("[\\x80-\\xFF]", ".");
 	}
 
 	private String parseRemoteHostName() {
@@ -246,6 +256,7 @@ public class SyslogHandler extends Handler {
 		String hostNameValue = LogManager.getLogManager().getProperty(
 				hostNameProperty);
 		if (hostNameValue != null && hostNameValue.length() > 0) {
+			hostNameValue = replaceNonUsAsciiAndTrim(hostNameValue, 255);
 			return hostNameValue;
 		}
 		return LOCALHOST;
@@ -310,22 +321,25 @@ public class SyslogHandler extends Handler {
 					.getHostName();
 			if (localHostName != null) {
 				myHostName = localHostName;
-				return localHostName;
 			}
 		} catch (UnknownHostException e) {
 			// Nothing
 		}
-		try {
-			String localHostAddress = java.net.Inet4Address.getLocalHost()
-					.getHostAddress();
-			if (localHostAddress != null) {
-				myHostName = localHostAddress;
-				return localHostAddress;
+		if (myHostName != null) {
+			try {
+				String localHostAddress = java.net.Inet4Address.getLocalHost()
+						.getHostAddress();
+				if (localHostAddress != null) {
+					myHostName = localHostAddress;
+				}
+			} catch (UnknownHostException e) {
+				// Nothing
 			}
-		} catch (UnknownHostException e) {
-			// Nothing
 		}
-		myHostName = MY_HOST_NAME;
+		if (myHostName != null) {
+			myHostName = MY_HOST_NAME;
+		}
+		myHostName = replaceNonUsAsciiAndTrim(myHostName, 255);
 		return myHostName;
 	}
 }

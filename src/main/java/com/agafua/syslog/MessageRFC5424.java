@@ -25,7 +25,7 @@ package com.agafua.syslog;
 /**
  * Message for sending by worker implementation.
  */
-class MessageRFC5424 extends Message {
+class MessageRFC5424 implements Message {
 	private final int maxMsgSize;
 
 	protected int getMaxMsgSize() {
@@ -36,14 +36,32 @@ class MessageRFC5424 extends Message {
 		this.maxMsgSize = maxMessageSize;
 	}
 
+	StringBuffer sb = new StringBuffer();
+
+	String result = null;
+
 	public void print(String s) {
-		for (int i = 0; i < s.length(); i++) {
-			if (pos >= this.maxMsgSize) {
-				break;
-			}
-			char c = s.charAt(i);
-			getValue()[pos] = (byte) c;
-			pos++;
+		result = null;
+		sb.append(s);
+	}
+
+	@Override
+	public String toString() {
+		if (result == null) {
+			String output = sb.toString();
+			output = output.substring(0, Math.min(maxMsgSize, output.length()));
+			result = output;
 		}
+		return result;
+	}
+
+	@Override
+	public byte[] getBytes() {
+		return toString().getBytes();
+	}
+
+	@Override
+	public int getLength() {
+		return toString().length();
 	}
 }
