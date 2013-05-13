@@ -20,41 +20,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
  */
 
-package com.agafua.syslog;
+package com.agafua.syslog.utilslog;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+import com.agafua.syslog.sender.AbstractAdaptor;
+import com.agafua.syslog.sender.Adaptor;
+import com.agafua.syslog.sender.Severity;
+
 /**
  * Auxiliary class that adapts fields of java.util.logging.LogRecord for syslog
  * format RFC 3164.
  */
-class AdaptorRFC3164 implements Adaptor {
+public class AdaptorRFC3164 extends AbstractAdaptor implements Adaptor {
+
+	private final LogRecord logRecord;
+
+	protected LogRecord getLogRecord() {
+		return logRecord;
+	}
+
+	public AdaptorRFC3164(LogRecord record) {
+		logRecord = record;
+	}
 
 	private static final String[] MONTH_NAMES = { "Jan", "Feb", "Mar", "Apr",
 			"May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-	public String adaptPriority(LogRecord logRecord, Facility facility) {
-		int code = (facility.getId() << 3) + adaptSeverity(logRecord);
-		return String.format("<%d>", code);
-	}
-
-	public int adaptSeverity(LogRecord logRecord) {
+	public Severity adaptSeverity() {
 		Level level = logRecord.getLevel();
 		if (level.intValue() >= Level.SEVERE.intValue()) {
-			return Severity.ERROR.getLevel();
+			setSeverity(Severity.ERROR);
 		} else if (level.intValue() >= Level.WARNING.intValue()) {
-			return Severity.WARNING.getLevel();
+			setSeverity(Severity.WARNING);
 		} else if (level.intValue() >= Level.INFO.intValue()) {
-			return Severity.INFO.getLevel();
+			setSeverity(Severity.INFO);
 		} else {
-			return Severity.DEBUG.getLevel();
+			setSeverity(Severity.DEBUG);
 		}
+		return getSeverity();
 	}
 
-	public String adaptTimeStamp(LogRecord logRecord) {
+	public String adaptTimeStamp() {
 		long millis = logRecord.getMillis();
 		GregorianCalendar calendar = new GregorianCalendar();
 		calendar.setTimeInMillis(millis);
