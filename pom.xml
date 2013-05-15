@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.agafua</groupId>
 	<artifactId>agafua</artifactId>
-	<version>0.2.ui1-SNAPSHOT</version>
+	<version>0.3-SNAPSHOT</version>
 	<name>Syslog handler for java.commons.logging</name>
 	<build>
 		<plugins>
