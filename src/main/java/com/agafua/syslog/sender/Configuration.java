@@ -1,5 +1,7 @@
 package com.agafua.syslog.sender;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -7,7 +9,6 @@ import java.util.logging.LogManager;
 import java.util.logging.SimpleFormatter;
 
 import com.agafua.syslog.SyslogHandler;
-import com.agafua.syslog.util.SysInfo;
 
 /**
  * All configuration parameter for the Syslog connectivity.
@@ -16,8 +17,8 @@ public class Configuration {
 
   // Default recommendations:
   public static final String VERSION = "02";
-  public static final String LOCALHOST = "localhost";
-  public static final String MY_HOST_NAME = "0.0.0.0";
+  private static final String LOCALHOST = "localhost";
+  private static final String DEFAULT_HOST_NAME = "0.0.0.0";
   public static final int DEFAULT_PORT = 514;
   public static final int MIN_PORT = 0;
   public static final int MAX_PORT = 65535;
@@ -39,7 +40,8 @@ public class Configuration {
   /**
    * Not null 
    */
-  private final String processId;
+  private static final String processId = initProcessId();
+  
   private int maxMessageSize = DEFAULT_MAX_MESSAGE_SIZE;
   private int port = DEFAULT_PORT;
 
@@ -57,7 +59,7 @@ public class Configuration {
   /**
    * Not null 
    */
-  private String localHostName;
+  private static final String localHostName = determineLocalHostName();
   
   /**
    * Not null 
@@ -84,8 +86,6 @@ public class Configuration {
    * Create an empty configuration that must be filled in using its set*() methods
    */
   public Configuration() {
-    localHostName = SysInfo.getInstance().determineLocalHostName();
-    processId = SysInfo.getInstance().getProcessId();
   }
   
   /**
@@ -97,7 +97,6 @@ public class Configuration {
     this();
     setApplicationId( parseApplicationId(logManager, handlerClass) );
     setFacility( parseFacility(logManager, handlerClass) );
-    setLocalHostName( parseLocalHostName(logManager, handlerClass) );
     setMaxMessageSize( parseMaxMessageSize(logManager, handlerClass) );
     setPort( parsePort(logManager, handlerClass) );
     setRemoteHostName( parseRemoteHostName(logManager, handlerClass) );
@@ -179,14 +178,6 @@ public class Configuration {
   public String getLocalHostName() {
     return localHostName;
   }
-
-
-  public void setLocalHostName(String localHostName) {
-    if ( localHostName != null && !localHostName.trim().isEmpty() ) {
-      this.localHostName  = replaceNonUsAsciiAndTrim(localHostName, 255);
-    }
-  }
-
 
   /**
    * @return not null 
@@ -360,4 +351,65 @@ public class Configuration {
     // Only ASCII-7 chars are allowed. So replace all others:
     return s.replaceAll("[\\x80-\\xFF]", ".");
   }
+  
+  
+  /**
+   * Static initializer, called only once to identify the current host name assuming this is a slow operation. 
+   * @return
+   */
+  private static String determineLocalHostName() {
+    String result;
+    
+    // Try to determine localhost by InetAddress
+    try {
+      result = java.net.InetAddress.getLocalHost().getHostName();
+      
+    } catch (Exception e) {
+      System.err.print("Localhost lookup failed with: ");
+      e.printStackTrace();
+      System.err.println("Trying to use the host's address ");
+
+      // Try to determine localhost by IPv4 InetAddress
+      try {
+        result = java.net.Inet4Address.getLocalHost().getHostAddress();
+        
+      } catch (Exception ex) {
+        result = DEFAULT_HOST_NAME;
+        
+        System.err.print("Use default ("+DEFAULT_HOST_NAME+") local host name, because of: ");
+        ex.printStackTrace();
+      }
+    }
+    return result;
+  }
+
+
+  /**
+   * Static initializer, called only once to identify the current process ID assuming this is a slow operation. 
+   * @return
+   */
+  private static String initProcessId() {
+    String processId;
+    RuntimeMXBean bean;
+    String jvmName;
+    String pid;
+    
+    processId = "-";
+    try {
+      // This might not work on any operating system.
+      // We return "-" of not successful.
+      bean = ManagementFactory.getRuntimeMXBean();
+
+      jvmName = bean.getName();
+      pid = jvmName.split( "@" )[ 0 ];
+
+      if ( pid != null && !pid.isEmpty() ) {
+        processId = pid;
+      }
+    } catch (Exception ex) {
+      System.err.print("Use default (-) process ID, because of: ");
+      ex.printStackTrace();
+    }
+    return processId;
+  }  
 }
