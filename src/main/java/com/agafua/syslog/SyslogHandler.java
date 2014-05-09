@@ -47,7 +47,8 @@ public class SyslogHandler extends Handler {
 
 	private final Connector connect;
 
-	SysInfo facts = SysInfo.getInstance();
+	private SysInfo facts = SysInfo.getInstance();
+	
 	//
 	// private String processId;
 	// private final String applicationId;
