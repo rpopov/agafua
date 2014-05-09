@@ -22,10 +22,23 @@ THE SOFTWARE.
 
 package com.agafua.syslog.sender;
 
+import java.util.concurrent.BlockingQueue;
+
 /**
  * Enumeration of transports for syslog protocol.
  */
 public enum Transport {
 
-    UDP, TCP;
+  UDP {
+    public UdpSender constructSender(Configuration config, BlockingQueue<Message> blockingQueue) {
+      return new UdpSender( config.getRemoteHostName(), config.getPort(), blockingQueue );
+    }
+  },
+  TCP {
+    public TcpSender constructSender(Configuration config, BlockingQueue<Message> blockingQueue) {
+      return new TcpSender( config.getRemoteHostName(), config.getPort(), blockingQueue );
+    }
+  };
+
+  public abstract Runnable constructSender(Configuration config, BlockingQueue<Message> blockingQueue);
 }

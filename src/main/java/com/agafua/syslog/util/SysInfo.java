@@ -58,29 +58,25 @@ public class SysInfo {
 
 	public String getProcessId() {
 		// Check if already loaded:
-		if (processId != null) {
-			return processId;
+		if (processId == null) {
+  		try {
+  			// This might not work on any operating system.
+  			// We return "-" of not successful.
+  			RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
+  
+  			String jvmName = bean.getName();
+  			String pid = jvmName.split("@")[0];
+  
+  			if (pid != null && pid.length() > 0) {
+  				this.processId = pid;
+  			} else {
+  				this.processId = "-";
+  			}  
+  		} catch (Exception e) {
+  			// we're very carefully here...
+  			this.processId = "-";
+  		}
 		}
-
-		try {
-			// This might not work on any operating system.
-			// We return "-" of not successful.
-			RuntimeMXBean bean = ManagementFactory.getRuntimeMXBean();
-
-			String jvmName = bean.getName();
-			String pid = jvmName.split("@")[0];
-
-			if (pid != null && pid.length() > 0) {
-				this.processId = pid;
-			} else {
-				this.processId = "-";
-			}
-
-		} catch (Exception e) {
-			// we're very carefully here...
-			this.processId = "-";
-		}
-
 		return this.processId;
 	}
 }
