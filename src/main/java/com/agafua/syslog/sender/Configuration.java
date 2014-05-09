@@ -20,7 +20,7 @@ public class Configuration {
   public static final int DEFAULT_PORT = 514;
   public static final int MIN_PORT = 0;
   public static final int MAX_PORT = 65535;
-  public static final int DEFAULT_MAX_MESSAGE_SIZE = 65535;
+  public static final int DEFAULT_MAX_MESSAGE_SIZE = 1024;
   public static final SyslogRfc SYSLOG_VERSION = SyslogRfc.RFC5424;
   public static final Facility FACILITY = Facility.LOCAL7;
 
@@ -35,34 +35,43 @@ public class Configuration {
   public static final String FORMATTER = "formatter";
 
   // Configuration values:
-  private SysInfo facts = SysInfo.getInstance();
-  private Integer port;
+  private Integer port = DEFAULT_PORT;
   private SyslogRfc syslogRfc;
   private String processId;
-  private String applicationId;
+  private String applicationId = "-";
   private String localHostName;
-  private String remoteHostName;
-  private Integer maxMessageSize;
-  private Transport transport;
-  private Facility facility;
-  private Formatter formatter;
+  private String remoteHostName = LOCALHOST;
+  private Integer maxMessageSize = DEFAULT_MAX_MESSAGE_SIZE;
+  private Transport transport = Transport.UDP;
+  private Facility facility = Facility.USER;
+  private Formatter formatter = new SimpleFormatter();
 
 
   /**
+   * @param logManager TODO
    * 
    */
-  public Configuration() {
-    setApplicationId( parseApplicationId() );
-    setFacility( parseFacility() );
-    setLocalHostName( parseLocalHostName() );
-    setMaxMessageSize( parseMaxMessageSize() );
-    setPort( parsePort() );
+  private Configuration() {
+    localHostName = SysInfo.getInstance().determineLocalHostName();    
+  }
+  
+  /**
+   * @param logManager TODO
+   * @param handlerClass TODO
+   * 
+   */
+  public Configuration(LogManager logManager, Class<SyslogHandler> handlerClass) {
+    setApplicationId( parseApplicationId(logManager, handlerClass) );
+    setFacility( parseFacility(logManager, handlerClass) );
+    setLocalHostName( parseLocalHostName(logManager, handlerClass) );
+    setMaxMessageSize( parseMaxMessageSize(logManager, handlerClass) );
+    setPort( parsePort(logManager, handlerClass) );
     setProcessId( SysInfo.getInstance().getProcessId() );
-    setRemoteHostName( parseRemoteHostName() );
+    setRemoteHostName( parseRemoteHostName(logManager, handlerClass) );
     setSyslogRfc( SyslogRfc.RFC5424 );
-    setTransport( parseTransport() );
+    setTransport( parseTransport(logManager, handlerClass) );
     
-    formatter = parseFormatter();
+    formatter = parseFormatter(logManager, handlerClass);
   }
 
 
@@ -127,7 +136,10 @@ public class Configuration {
 
 
   public void setLocalHostName(String localHostName) {
-    this.localHostName = localHostName;
+    if ( localHostName != null 
+         && localHostName.length() > 0 ) {
+      this.localHostName  = Validator.replaceNonUsAsciiAndTrim( localHostName, 255 );
+    }
   }
 
 
@@ -165,7 +177,9 @@ public class Configuration {
    * @see #formatter
    */
   public final void setFormatter(Formatter formatter) {
-    this.formatter = formatter;
+    if ( formatter != null ) {
+      this.formatter = formatter;
+    }
   }
 
 
@@ -177,41 +191,34 @@ public class Configuration {
   }
 
 
-  private Formatter parseFormatter() {
-
-    Formatter formatter = new SimpleFormatter();
-    String formatterProperty = SyslogHandler.class.getName() + "." + FORMATTER;
-    String formatterValue = LogManager.getLogManager().getProperty( formatterProperty );
-    if ( formatterValue != null ) {
+  private Formatter parseFormatter(LogManager logManager, Class<SyslogHandler> handlerClass) throws IllegalArgumentException {
+    Formatter formatter = null;
+    Class<? extends Formatter> c2;
+    
+    String formatterClassName = logManager.getProperty( handlerClass.getName() + "." + FORMATTER );
+    if ( formatterClassName != null ) {
       try {
-        Class<? extends Formatter> c2 = Class.forName( formatterValue ).asSubclass( Formatter.class );
+        c2 = Class.forName( formatterClassName ).asSubclass( Formatter.class );
         formatter = c2.newInstance();
-      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-        // TODO Log ERROR
-        System.err.println( "Could not initialize java.util.logging Formatter class." );
-        e.printStackTrace();
+      } catch (  ClassNotFoundException 
+               | InstantiationException 
+               | IllegalAccessException ex) {
+        throw new IllegalArgumentException("Could not initialize java.util.logging Formatter class: "+formatterClassName, ex);
       }
     }
-
     return formatter;
   }
 
 
-  private Transport parseTransport() {
-    String transportProperty = SyslogHandler.class.getName() + "." + TRANSPORT_PROPERTY;
-    String transportValue = LogManager.getLogManager().getProperty( transportProperty );
-    for (Transport t : Transport.values()) {
-      if ( t.name().equalsIgnoreCase( transportValue ) ) {
-        return t;
-      }
-    }
-    return Transport.UDP;
+  // TODO: handle null
+  private Transport parseTransport(LogManager logManager, Class<SyslogHandler> handlerClass) {
+    String transportValue = logManager.getProperty( handlerClass.getName() + "." + TRANSPORT_PROPERTY );
+    return Transport.valueOf(transportValue);
   }
 
 
-  private String parseApplicationId() {
-    String appIdProperty = SyslogHandler.class.getName() + "." + APPLICATION_ID;
-    String appIdValue = LogManager.getLogManager().getProperty( appIdProperty );
+  private String parseApplicationId(LogManager logManager, Class<SyslogHandler> handlerClass) {
+    String appIdValue = logManager.getProperty( handlerClass.getName() + "." + APPLICATION_ID );
     if ( appIdValue != null && appIdValue.length() > 0 ) {
       // The RFC allows max. 48 chars for the app id, so cut it on demand
       appIdValue = Validator.replaceNonUsAsciiAndTrim( appIdValue, 48 );
@@ -222,9 +229,8 @@ public class Configuration {
   }
 
 
-  private String parseRemoteHostName() {
-    String hostNameProperty = SyslogHandler.class.getName() + "." + REMOTE_HOSTNAME_PROPERTY;
-    String hostNameValue = LogManager.getLogManager().getProperty( hostNameProperty );
+  private String parseRemoteHostName(LogManager logManager, Class<SyslogHandler> handlerClass) {
+    String hostNameValue = logManager.getProperty( handlerClass.getName() + "." + REMOTE_HOSTNAME_PROPERTY );
     if ( hostNameValue != null && hostNameValue.length() > 0 ) {
       hostNameValue = Validator.replaceNonUsAsciiAndTrim( hostNameValue, 255 );
       return hostNameValue;
@@ -233,13 +239,12 @@ public class Configuration {
   }
 
 
-  private int parseMaxMessageSize() {
-    String maxMsgSizeProperty = SyslogHandler.class.getName() + "." + MAX_MESSAGE_SIZE_PROPERTY;
-    String maxMsgSize = LogManager.getLogManager().getProperty( maxMsgSizeProperty );
+  private int parseMaxMessageSize(LogManager logManager, Class<SyslogHandler> handlerClass) {
+    String maxMsgSize = logManager.getProperty( handlerClass.getName() + "." + MAX_MESSAGE_SIZE_PROPERTY );
     if ( maxMsgSize != null ) {
       Integer p = null;
       try {
-        p = Integer.parseInt( maxMsgSizeProperty );
+        p = Integer.parseInt( SyslogHandler.class.getName() + "." + MAX_MESSAGE_SIZE_PROPERTY );
       } catch (NumberFormatException e) {
 
       }
@@ -251,23 +256,14 @@ public class Configuration {
   }
 
 
-  private String parseLocalHostName() {
-
-    String localHostProperty = SyslogHandler.class.getName() + "." + FACILITY_PROPERTY;
-    String localHostValue = LogManager.getLogManager().getProperty( localHostProperty );
-
-    if ( localHostValue != null && localHostValue.length() > 0 ) {
-      localHostValue = Validator.replaceNonUsAsciiAndTrim( localHostValue, 255 );
-      return localHostValue;
-    } else {
-      return facts.determineLocalHostName();
-    }
+  // TODO: FIX THE PROPERTY NAME!
+  private static String parseLocalHostName(LogManager logManager, Class<SyslogHandler> handlerClass) {
+    return logManager.getProperty( handlerClass.getName() + "." + FACILITY_PROPERTY );
   }
 
 
-  private int parsePort() {
-    String portProperty = SyslogHandler.class.getName() + "." + PORT_PROPERTY;
-    String portValue = LogManager.getLogManager().getProperty( portProperty );
+  private int parsePort(LogManager logManager, Class<SyslogHandler> handlerClass) {
+    String portValue = logManager.getProperty( handlerClass.getName() + "." + PORT_PROPERTY );
     if ( portValue != null ) {
       Integer p = null;
       try {
@@ -283,14 +279,9 @@ public class Configuration {
   }
 
 
-  private Facility parseFacility() {
-    String facilityProperty = SyslogHandler.class.getName() + "." + FACILITY_PROPERTY;
-    String facilityValue = LogManager.getLogManager().getProperty( facilityProperty );
-    for (Facility f : Facility.values()) {
-      if ( f.name().equalsIgnoreCase( facilityValue ) ) {
-        return f;
-      }
-    }
-    return Facility.USER;
+  // TODO: handle null
+  private Facility parseFacility(LogManager logManager, Class<SyslogHandler> handlerClass) {
+    String facilityValue = logManager.getProperty( handlerClass.getName() + "." + FACILITY_PROPERTY );
+    return Facility.valueOf(facilityValue);
   }
 }

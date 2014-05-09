@@ -23,6 +23,7 @@ THE SOFTWARE.
 package com.agafua.syslog;
 
 import java.util.logging.Handler;
+import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
 import com.agafua.syslog.sender.Configuration;
@@ -43,7 +44,7 @@ public class SyslogHandler extends Handler {
 	private boolean closed;
 
 	public SyslogHandler() {
-		config = new Configuration();
+		config = new Configuration(LogManager.getLogManager(), SyslogHandler.class);
 		connect = new SyslogConnector(config);
 	}
 
