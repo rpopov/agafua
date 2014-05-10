@@ -24,50 +24,46 @@ package com.agafua.syslog;
 
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
-import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
 import com.agafua.syslog.sender.Configuration;
 import com.agafua.syslog.sender.Connector;
 import com.agafua.syslog.sender.Facility;
-import com.agafua.syslog.sender.MessageRFC5424;
+import com.agafua.syslog.sender.Message;
 import com.agafua.syslog.sender.SyslogConnector;
 import com.agafua.syslog.sender.Transport;
-import com.agafua.syslog.utilslog.AdaptorRFC5424;
 
 /**
  * Implementation of java.util.logging.Handler for syslog protocol RFC 3164.
+ * Requires explicit initialization through the setter methods.
+ * The initialization is assumed complete when publish() is called the first time
  */
 public class SyslogHandlerBean extends Handler {
 
   private final Configuration config;
   
-	private final Connector connect;
+	private Connector connector;
 
 	private boolean closed;
 
+	/**
+	 * Requires explicit initialization through the setter methods
+	 */
 	public SyslogHandlerBean() {
-		config = new Configuration(LogManager.getLogManager(), SyslogHandlerBean.class);
-		connect = new SyslogConnector(config);
+		config = new Configuration();
 	}
 
+	/**
+	 * @see java.util.logging.Handler#publish(java.util.logging.LogRecord)
+	 */
 	public void publish(LogRecord record) {
-		if (closed) {
-			return;
+	  Message message;
+	  
+		if ( !closed ) {
+  		message = config.constructMessage( record, "-" );
+  
+  		getConnector().publish(message);
 		}
-		String msg = config.getFormatter().format(record);
-		AdaptorRFC5424 a = new AdaptorRFC5424(record);
-		a.setMessage(msg);
-		a.adaptSeverity();
-		a.adaptTimeStamp();
-		a.setMessageId(getMessageId());
-		MessageRFC5424 m = new MessageRFC5424(a);
-
-		connect.publish(m);
-	}
-
-	private String getMessageId() {
-		return "-";
 	}
 
 	public void flush() {
@@ -75,10 +71,57 @@ public class SyslogHandlerBean extends Handler {
 	}
 
 	public void close() throws SecurityException {
-		connect.close();
-		closed = true;
+	  if ( !closed ) {
+  		getConnector().close();
+  		closed = true;
+	  }
 	}
 	
+  /**
+   * Lazily initialize the connector to the syslog, assuming the configuration phase completed  
+   * @see #connector
+   */
+  public final Connector getConnector() {
+    if ( connector == null ) {
+      connector = new SyslogConnector(config);      
+    }
+    return connector;
+  }
+
+  /**
+   * Use bean-style initialization
+   */ 
+	public void setApplicationId(String  applicationId) {
+	  if ( applicationId != null && !applicationId.trim().isEmpty() ) {
+	    config.setApplicationId( applicationId.trim() );	    
+	  }
+	}
+	
+	public void setMaxMessageSize(String maxSize) {
+	  if ( maxSize != null && !maxSize.isEmpty() ) {
+	    try {
+	      config.setMaxMessageSize( Integer.parseInt( maxSize.trim() ) );
+	    } catch (Exception ex) {
+	      throw new IllegalArgumentException("Setting maximal message size to: "+maxSize+" caused:", ex);
+	    }
+	  }
+	}
+	
+	public void setPort(String port) {
+	  if ( port != null && !port.isEmpty()) {
+	    try {
+	      config.setPort( Integer.parseInt( port ) );
+	    } catch (Exception ex) {
+        throw new IllegalArgumentException("Setting port to: "+port+" caused:", ex);
+	    }
+	  }
+	}
+	
+	public void setRemoteHostName(String hostName) {
+	  if ( hostName != null && !hostName.isEmpty() ) {
+	    config.setRemoteHostName( hostName );
+	  }
+	}
 	
   /**
    * Use bean-style initialization 
@@ -118,5 +161,5 @@ public class SyslogHandlerBean extends Handler {
         throw new IllegalArgumentException("Could not initialize java.util.logging Formatter class: "+formatterClassName, ex);
       }
     }
-  }	
+  }
 }

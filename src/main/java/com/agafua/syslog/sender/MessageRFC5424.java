@@ -25,7 +25,7 @@ package com.agafua.syslog.sender;
 /**
  * Message for sending by worker implementation.
  */
-public class MessageRFC5424 extends AbstractMessage implements Message {
+public class MessageRFC5424 extends AbstractMessage {
 
 	public MessageRFC5424(Adaptor adaptor) {
 		super(adaptor);

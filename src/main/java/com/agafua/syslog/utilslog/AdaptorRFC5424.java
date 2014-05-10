@@ -11,7 +11,7 @@ import com.agafua.syslog.sender.Adaptor;
  * Auxiliary class that adapts fields of java.util.logging.LogRecord for syslog
  * format RFC 5424.
  */
-public class AdaptorRFC5424 extends AdaptorRFC3164 implements Adaptor {
+public class AdaptorRFC5424 extends AdaptorRFC3164 {
 
 	public AdaptorRFC5424(LogRecord record) {
 		super(record);
@@ -26,13 +26,14 @@ public class AdaptorRFC5424 extends AdaptorRFC3164 implements Adaptor {
 	 * .LogRecord)
 	 */
 	@Override
-	public String adaptTimeStamp() {
+  protected String adaptTimeStamp() {
 		long millis = getLogRecord().getMillis();
 		Date logDate = new Date(millis);
 
-		String ts = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-				.format(logDate);
+		String ts = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(logDate);
+		
 		setTimestamp(ts.replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2"));
+		
 		return getTimestamp();
 	}
 }

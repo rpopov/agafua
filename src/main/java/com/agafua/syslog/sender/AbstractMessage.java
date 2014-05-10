@@ -2,9 +2,13 @@ package com.agafua.syslog.sender;
 
 public abstract class AbstractMessage implements Message {
 
-	final Adaptor adaptor;
+	private final Adaptor adaptor;
 
-	public Severity getSeverity() {
+	public AbstractMessage(Adaptor adaptor) {
+  	this.adaptor = adaptor;
+  }
+
+  public Severity getSeverity() {
 		return adaptor.getSeverity();
 	}
 
@@ -19,9 +23,4 @@ public abstract class AbstractMessage implements Message {
 	public String getMessageId() {
 		return adaptor.getMessageId();
 	}
-
-	public AbstractMessage(Adaptor adaptor) {
-		this.adaptor = adaptor;
-	}
-
 }

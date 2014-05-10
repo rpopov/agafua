@@ -28,9 +28,8 @@ import java.util.logging.LogRecord;
 
 import com.agafua.syslog.sender.Configuration;
 import com.agafua.syslog.sender.Connector;
-import com.agafua.syslog.sender.MessageRFC5424;
+import com.agafua.syslog.sender.Message;
 import com.agafua.syslog.sender.SyslogConnector;
-import com.agafua.syslog.utilslog.AdaptorRFC5424;
 
 /**
  * Implementation of java.util.logging.Handler for syslog protocol RFC 3164.
@@ -49,22 +48,12 @@ public class SyslogHandler extends Handler {
 	}
 
 	public void publish(LogRecord record) {
-		if (closed) {
-			return;
+	  Message m;
+	  
+		if ( !closed) {
+  		m = config.constructMessage( record, "-" );  		
+  		connect.publish(m);
 		}
-		String msg = config.getFormatter().format(record);
-		AdaptorRFC5424 a = new AdaptorRFC5424(record);
-		a.setMessage(msg);
-		a.adaptSeverity();
-		a.adaptTimeStamp();
-		a.setMessageId(getMessageId());
-		MessageRFC5424 m = new MessageRFC5424(a);
-
-		connect.publish(m);
-	}
-
-	private String getMessageId() {
-		return "-";
 	}
 
 	public void flush() {
@@ -72,7 +61,9 @@ public class SyslogHandler extends Handler {
 	}
 
 	public void close() throws SecurityException {
-		connect.close();
-		closed = true;
+	  if ( !closed ) {
+  		connect.close();
+  		closed = true;
+	  }
 	}
 }

@@ -35,22 +35,25 @@ import com.agafua.syslog.sender.Severity;
  * Auxiliary class that adapts fields of java.util.logging.LogRecord for syslog
  * format RFC 3164.
  */
-public class AdaptorRFC3164 extends AbstractAdaptor implements Adaptor {
+public class AdaptorRFC3164 extends AbstractAdaptor {
 
 	private final LogRecord logRecord;
 
-	protected LogRecord getLogRecord() {
-		return logRecord;
-	}
-
-	public AdaptorRFC3164(LogRecord record) {
-		logRecord = record;
-	}
-
 	private static final String[] MONTH_NAMES = { "Jan", "Feb", "Mar", "Apr",
-			"May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+	                                              "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-	public Severity adaptSeverity() {
+  public AdaptorRFC3164(LogRecord record) {
+		logRecord = record;
+		
+    adaptSeverity();
+    adaptTimeStamp();		
+	}
+
+	protected final LogRecord getLogRecord() {
+  	return logRecord;
+  }
+
+  protected Severity adaptSeverity() {
 		Level level = logRecord.getLevel();
 		if (level.intValue() >= Level.SEVERE.intValue()) {
 			setSeverity(Severity.ERROR);
@@ -64,7 +67,7 @@ public class AdaptorRFC3164 extends AbstractAdaptor implements Adaptor {
 		return getSeverity();
 	}
 
-	public String adaptTimeStamp() {
+	protected String adaptTimeStamp() {
 		long millis = logRecord.getMillis();
 		GregorianCalendar calendar = new GregorianCalendar();
 		calendar.setTimeInMillis(millis);
@@ -97,5 +100,4 @@ public class AdaptorRFC3164 extends AbstractAdaptor implements Adaptor {
 		}
 		return value;
 	}
-
 }

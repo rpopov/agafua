@@ -6,10 +6,6 @@ package com.agafua.syslog.sender;
  */
 public interface Adaptor {
 
-	Severity adaptSeverity();
-
-	String adaptTimeStamp();
-
 	Severity getSeverity();
 
 	String getTimestamp();

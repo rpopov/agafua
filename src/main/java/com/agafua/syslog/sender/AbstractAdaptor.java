@@ -2,12 +2,12 @@ package com.agafua.syslog.sender;
 
 public abstract class AbstractAdaptor implements Adaptor {
 
-	private Severity severity = null;
-	private String timestamp = null;
-	private String messageId = null;
-	private String message = null;
+	private Severity severity;
+	private String timestamp;
+	private String messageId;
+	private String message;
 
-	public String getMessage() {
+  public String getMessage() {
 		return message;
 	}
 
@@ -23,24 +23,19 @@ public abstract class AbstractAdaptor implements Adaptor {
 		this.messageId = messageId;
 	}
 
-	protected void setSeverity(Severity severity) {
+	public Severity getSeverity() {
+  	return severity;
+  }
+
+  protected void setSeverity(Severity severity) {
 		this.severity = severity;
 	}
 
-	protected void setTimestamp(String timestamp) {
+	public String getTimestamp() {
+  	return timestamp;
+  }
+
+  protected void setTimestamp(String timestamp) {
 		this.timestamp = timestamp;
 	}
-
-	public AbstractAdaptor() {
-		super();
-	}
-
-	public Severity getSeverity() {
-		return severity;
-	}
-
-	public String getTimestamp() {
-		return timestamp;
-	}
-
 }
