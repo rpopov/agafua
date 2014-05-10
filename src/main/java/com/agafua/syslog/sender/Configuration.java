@@ -74,6 +74,21 @@ public class Configuration {
     return new Thread( getTransport().constructSender( this, blockingQueue ));
   }
 
+  /**
+   * Construct a message according to all settings held in this configuration,
+   * ready to be sent to syslog  
+   * @param record 
+   * @param messageId the non-null ID of the message
+   * @return a non-null message to send in syslog
+   */
+  public Message constructMessage(LogRecord record, String messageId) {
+    Message message;
+    
+    message = getSyslogRfc().constructMessage( this, record, messageId );
+    
+    return message;
+  }
+
   public Facility getFacility() {
     return facility;
   }
@@ -203,27 +218,6 @@ public class Configuration {
    */
   public String getProcessId() {
   	return processId;
-  }
-
-  /**
-   * Construct a message according to all settings held in this configuration,
-   * ready to be sent to syslog  
-   * @param record 
-   * @param messageId the non-null ID of the message
-   * @return a non-null message to send in syslog
-   */
-  public Message constructMessage(LogRecord record, String messageId) {
-    Message message;
-    AbstractAdaptor a;
-    String text = getFormatter().format(record);
-    
-    a = getSyslogRfc().constructAdaptor( record );
-    a.setMessageId( messageId );    
-    a.setMessage(text);
-    
-    message = getSyslogRfc().constructMessage( this, a );
-    
-    return message;
   }
 
   /** 

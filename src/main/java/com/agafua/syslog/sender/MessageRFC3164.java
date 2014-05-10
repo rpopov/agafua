@@ -22,12 +22,46 @@ THE SOFTWARE.
 
 package com.agafua.syslog.sender;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.logging.LogRecord;
+
 /**
  * Message for sending by worker implementation.
  */
 class MessageRFC3164 extends AbstractMessage {
 
-	public MessageRFC3164(Adaptor adaptor, int size) {
-		super(adaptor, size);
+  protected static final String[] MONTH_NAMES = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+	public MessageRFC3164(Configuration configuration, LogRecord record, String messageId) {
+		super(configuration, record, messageId);
 	}
+
+	/**
+   * TODO REVIEW THE LOGIC
+	 * @see com.agafua.syslog.sender.Message#getTimestamp()
+	 */
+  public String getTimestamp() {
+    long millis = getLogRecord().getMillis();
+    
+    GregorianCalendar calendar = new GregorianCalendar();
+    calendar.setTimeInMillis(millis);
+    
+    int month = limit(calendar.get(Calendar.MONTH), 0, 11);
+    String mmm = MONTH_NAMES[month];
+    
+    int day = limit(calendar.get(Calendar.DAY_OF_MONTH), 1, 31);
+    String dd = indent("" + day, 2, ' ');
+    
+    int hour = limit(calendar.get(Calendar.HOUR_OF_DAY), 0, 23);
+    String hh = indent("" + hour, 2, '0');
+    
+    int minute = limit(calendar.get(Calendar.MINUTE), 0, 59);
+    String mm = indent("" + minute, 2, '0');
+    
+    int second = limit(calendar.get(Calendar.SECOND), 0, 59);
+    String ss = indent("" + second, 2, '0');
+    
+    return String.format("%s %s %s:%s:%s", mmm, dd, hh, mm, ss);
+  }
 }

@@ -22,12 +22,59 @@ THE SOFTWARE.
 
 package com.agafua.syslog.sender;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.LogRecord;
+
 /**
  * Message for sending by worker implementation.
  */
 public class MessageRFC5424 extends AbstractMessage {
 
-	public MessageRFC5424(Adaptor adaptor, int size) {
-		super(adaptor, size);
+	public MessageRFC5424(Configuration configuration, LogRecord record, String messageId) {	  
+		super(configuration, record, messageId);
+		
+    print( calculatePriority( configuration ) ); // ABNF RFC5424: PRI
+    print("2"); // TODO ABNF RFC5424: VERSION
+    print(" "); // ABNF RFC5424: SP
+    
+    print(getTimestamp()); // ABNF RFC5424: TIMESTAMP
+    
+    print(" "); // ABNF RFC5424: SP
+    
+    print(configuration.getLocalHostName()); // ABNF RFC5424: HOSTNAME
+    
+    print(" "); // ABNF RFC5424: SP
+    
+    print(configuration.getApplicationId()); // ABNF RFC5424: APP-NAME
+    
+    print(" "); // ABNF RFC5424: SP
+    
+    print(configuration.getProcessId()); // ABNF RFC5424: PROCID
+    
+    print(" "); // ABNF RFC5424: SP
+    
+    print(getMessageId()); // ABNF RFC5424: MSGID
+    
+    print(" "); // ABNF RFC5424: SP
+    
+    print(getMessage());    
+		
 	}
+	
+	/**
+	 * TODO REVIEW THE LOGIC
+	 * @see com.agafua.syslog.sender.AbstractMessage#getTimestamp()
+	 */
+  public String getTimestamp() {
+    String result;
+    long millis = getLogRecord().getMillis();
+    Date logDate = new Date(millis);
+
+    String ts = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(logDate);
+    
+    result = ts.replaceAll("(\\d\\d)(\\d\\d)$", "$1:$2");
+    
+    return result;
+  }	
 }

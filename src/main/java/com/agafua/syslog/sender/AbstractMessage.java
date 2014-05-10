@@ -1,37 +1,64 @@
 package com.agafua.syslog.sender;
 
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+
 public abstract class AbstractMessage implements Message {
 
+  private final LogRecord logRecord;
+  
   private static final byte NON_ASCII_SYMBOL = (byte) '.';
   private static final byte LF_SYMBOL = (byte) '\\';
   
-  private final Adaptor adaptor;  
   private final byte[] value;
   private int pos = 0;
+  private String messageId;
+  private String message;
 
-	public AbstractMessage(Adaptor adaptor, int size) {
-  	this.adaptor = adaptor;
+	public AbstractMessage(Configuration configuration, LogRecord record, String messageId) {
+	  this.logRecord = record;
   	
-  	value = new byte[size];
+  	this.value = new byte[ configuration.getMaxMessageSize() ];
+  	
+  	this.message = configuration.getFormatter().format(record);
+  	this.messageId = messageId;
   }
 
+  public String getMessage() {
+    return message;
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
+  }
+
+  public String getMessageId() {
+    return messageId;
+  }
+
+  public void setMessageId(String messageId) {
+    this.messageId = messageId;
+  }
+	
+	
   public Severity getSeverity() {
-		return adaptor.getSeverity();
-	}
+    Severity result; 
+    Level level = logRecord.getLevel();
+    
+    if (level.intValue() >= Level.SEVERE.intValue()) {
+      result = Severity.ERROR;
+    } else if (level.intValue() >= Level.WARNING.intValue()) {
+      result = Severity.WARNING;
+    } else if (level.intValue() >= Level.INFO.intValue()) {
+      result = Severity.INFO;
+    } else {
+      result = Severity.DEBUG;
+    }
+    return result;
+  }
 
-	public String getTimestamp() {
-		return adaptor.getTimestamp();
-	}
 
-	public String getMessage() {
-		return adaptor.getMessage();
-	}
-
-	public String getMessageId() {
-		return adaptor.getMessageId();
-	}
-
-  public int getLength() {
+	public int getLength() {
   	return pos;
   }
 
@@ -56,6 +83,34 @@ public abstract class AbstractMessage implements Message {
   	}
   }
 
+  protected final LogRecord getLogRecord() {
+    return logRecord;
+  }
+
+  protected static String indent(String s, int requiredLength, char identChar) {
+    while (s.length() < requiredLength) {
+      s = identChar + s;
+    }
+    return s;
+  }
+
+  protected static int limit(int value, int min, int max) {
+    if (value < min) {
+      return min;
+    }
+    if (value > max) {
+      return max;
+    }
+    return value;
+  }
+  
+  
+  protected String calculatePriority(Configuration config) {
+    int code = (config.getFacility().getId() << 3) + getSeverity().getLevel();
+    return String.format("<%d>", code);
+  
+  }
+  
   /**
    * @see java.lang.Object#toString()
    */
