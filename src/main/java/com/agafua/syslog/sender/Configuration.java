@@ -153,7 +153,7 @@ public class Configuration {
   }
 
 
-  public Integer getMaxMessageSize() {
+  public int getMaxMessageSize() {
     return maxMessageSize;
   }
 
@@ -215,13 +215,13 @@ public class Configuration {
   public Message constructMessage(LogRecord record, String messageId) {
     Message message;
     AbstractAdaptor a;
-    String msg = getFormatter().format(record);
+    String text = getFormatter().format(record);
     
     a = getSyslogRfc().constructAdaptor( record );
     a.setMessageId( messageId );    
-    a.setMessage(msg);
+    a.setMessage(text);
     
-    message = getSyslogRfc().constructMessage( a );
+    message = getSyslogRfc().constructMessage( this, a );
     
     return message;
   }

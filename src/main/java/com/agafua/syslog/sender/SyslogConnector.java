@@ -70,7 +70,6 @@ public class SyslogConnector implements Connector {
 	 */
 	public void publish(Message message) {
     if ( isOpen() ) {
-  	  config.getSyslogRfc().fillIn( config, message );
       blockingQueue.offer(message);
     } else {
       throw new IllegalStateException("Expected an open connector");

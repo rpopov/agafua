@@ -27,35 +27,7 @@ package com.agafua.syslog.sender;
  */
 public class MessageRFC5424 extends AbstractMessage {
 
-	public MessageRFC5424(Adaptor adaptor) {
-		super(adaptor);
-	}
-
-	StringBuffer sb = new StringBuffer();
-
-	String result = null;
-
-	public void print(String s) {
-		result = null;
-		sb.append(s);
-	}
-
-	@Override
-	public String toString() {
-		if (result == null) {
-			String output = sb.toString();
-			result = output;
-		}
-		return result;
-	}
-
-	@Override
-	public byte[] getBytes() {
-		return toString().getBytes();
-	}
-
-	@Override
-	public int getLength() {
-		return toString().length();
+	public MessageRFC5424(Adaptor adaptor, int size) {
+		super(adaptor, size);
 	}
 }
