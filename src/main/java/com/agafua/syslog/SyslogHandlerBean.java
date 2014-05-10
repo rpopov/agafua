@@ -3,6 +3,7 @@ package com.agafua.syslog;
 import java.util.logging.Formatter;
 
 import com.agafua.syslog.sender.Facility;
+import com.agafua.syslog.sender.SyslogRfc;
 import com.agafua.syslog.sender.Transport;
 
 /**
@@ -67,6 +68,16 @@ public class SyslogHandlerBean extends BaseSyslogHandler {
     }
   }
 	
+  /**
+   * Use bean-style initialization 
+   * @param transportValue
+   */
+  public void setRfc(String rfcName) throws IllegalArgumentException {
+    if ( rfcName != null && !rfcName.isEmpty() ) {
+      getConfig().setSyslogRfc( SyslogRfc.valueOf(rfcName) );
+    }
+  }
+  
 	/**
 	 * Use bean-style initialization 
 	 * @param formatterClassName

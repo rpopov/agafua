@@ -26,6 +26,7 @@ import java.util.logging.Formatter;
 import java.util.logging.LogManager;
 
 import com.agafua.syslog.sender.Facility;
+import com.agafua.syslog.sender.SyslogRfc;
 import com.agafua.syslog.sender.Transport;
 
 /**
@@ -42,6 +43,7 @@ public class SyslogHandler extends BaseSyslogHandler {
   private static final String APPLICATION_ID = "applicationId";
   private static final String MAX_MESSAGE_SIZE_PROPERTY = "maxMsgSize";
   private static final String FORMATTER_PROPERTY = "formatter";
+  private static final String RFC_PROPERTY = "rfc";
 
   /**
 	 * The default constructor.
@@ -62,7 +64,7 @@ public class SyslogHandler extends BaseSyslogHandler {
       parseRemoteHostName(logManager);
       parseTransport(logManager);    
       parseFormatter(logManager);
-      
+      parseRfc(logManager);
     } catch (IllegalArgumentException ex) {
       System.err.print("Initialization of the syslog logging mechanism failed: ");
       ex.printStackTrace();
@@ -104,6 +106,17 @@ public class SyslogHandler extends BaseSyslogHandler {
       result = Transport.valueOf(transportValue);
       
       getConfig().setTransport( result );
+    }
+  }
+
+  private void parseRfc(LogManager logManager) {
+    SyslogRfc result;
+    String rfcValue = logManager.getProperty( this.getClass().getName() + "." + RFC_PROPERTY );
+    
+    if ( rfcValue != null ) {
+      result = SyslogRfc.valueOf(rfcValue);
+      
+      getConfig().setSyslogRfc( result );
     }
   }
 
