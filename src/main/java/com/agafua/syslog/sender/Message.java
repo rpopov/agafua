@@ -6,17 +6,7 @@ package com.agafua.syslog.sender;
  */
 public interface Message {
 
-	void print(String s);
-
 	int getLength();
 
 	byte[] getBytes();
-
-	String getTimestamp();
-
-	String getMessageId();
-
-	String getMessage();
-
-	Severity getSeverity();
 }

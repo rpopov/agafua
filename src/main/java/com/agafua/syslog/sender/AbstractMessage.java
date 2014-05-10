@@ -24,24 +24,31 @@ public abstract class AbstractMessage implements Message {
   	this.messageId = messageId;
   }
 
-  public String getMessage() {
+  public int getLength() {
+  	return pos;
+  }
+
+  public byte[] getBytes() {
+  	return value;
+  }
+
+  protected String getMessage() {
     return message;
   }
 
-  public void setMessage(String message) {
+  protected void setMessage(String message) {
     this.message = message;
   }
 
-  public String getMessageId() {
+  protected String getMessageId() {
     return messageId;
   }
 
-  public void setMessageId(String messageId) {
+  protected void setMessageId(String messageId) {
     this.messageId = messageId;
   }
-	
-	
-  public Severity getSeverity() {
+		
+  protected Severity getSeverity() {
     Severity result; 
     Level level = logRecord.getLevel();
     
@@ -58,15 +65,7 @@ public abstract class AbstractMessage implements Message {
   }
 
 
-	public int getLength() {
-  	return pos;
-  }
-
-  public byte[] getBytes() {
-  	return value;
-  }
-
-  public void print(String s) {
+  protected void print(String s) {
     char c;
     
   	for (int i = 0; i < s.length() && pos < value.length; i++) {
