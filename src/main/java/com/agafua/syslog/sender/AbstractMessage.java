@@ -65,6 +65,10 @@ public abstract class AbstractMessage implements Message {
   }
 
 
+  protected final LogRecord getLogRecord() {
+    return logRecord;
+  }
+
   protected void print(String s) {
     char c;
     
@@ -80,10 +84,6 @@ public abstract class AbstractMessage implements Message {
   		}
   		pos++;
   	}
-  }
-
-  protected final LogRecord getLogRecord() {
-    return logRecord;
   }
 
   protected static String indent(String s, int requiredLength, char identChar) {

@@ -35,10 +35,19 @@ class MessageRFC3164 extends AbstractMessage {
 
 	public MessageRFC3164(Configuration configuration, LogRecord record, String messageId) {
 		super(configuration, record, messageId);
+		
+    print( calculatePriority( configuration ) ); 
+    print(getTimestamp()); 
+    print(" ");
+    
+    print(configuration.getLocalHostName());     
+    print(" "); 
+    
+    print(getMessage());     
+		
 	}
 
 	/**
-   * TODO REVIEW THE LOGIC
 	 * @see com.agafua.syslog.sender.Message#getTimestamp()
 	 */
   public String getTimestamp() {
