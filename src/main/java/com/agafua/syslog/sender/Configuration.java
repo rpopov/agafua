@@ -4,13 +4,12 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
 /**
  * All configuration parameter for the Syslog connectivity.
+ * Call its set* to fill it in before use.
  */
 public class Configuration {
 
@@ -22,16 +21,6 @@ public class Configuration {
   private static final int MAX_PORT = 65535;
   private static final int DEFAULT_MAX_MESSAGE_SIZE = 1024;
 
-  // Property names:
-  private static final String TRANSPORT_PROPERTY = "transport";
-  private static final String REMOTE_HOSTNAME_PROPERTY = "remoteHostname";
-  private static final String PORT_PROPERTY = "port";
-  private static final String FACILITY_PROPERTY = "facility";
-  private static final String APPLICATION_ID = "applicationId";
-  private static final String MAX_MESSAGE_SIZE_PROPERTY = "maxMsgSize";
-  private static final String FORMATTER = "formatter";
-
-  // Configuration values:
   /**
    * Not null 
    */
@@ -75,35 +64,6 @@ public class Configuration {
    * Not null 
    */
   private Formatter formatter = new SimpleFormatter();
-
-
-  /**
-   * Create an empty configuration that must be filled in using its set*() methods
-   */
-  public Configuration() {
-  }
-  
-  /**
-   * @param logManager
-   * @param handlerClass
-   * 
-   */
-  public Configuration(LogManager logManager, Class<? extends Handler> handlerClass) {
-    this();
-    try {
-      setApplicationId( parseApplicationId(logManager, handlerClass) );
-      setFacility( parseFacility(logManager, handlerClass) );
-      setMaxMessageSize( parseMaxMessageSize(logManager, handlerClass) );
-      setPort( parsePort(logManager, handlerClass) );
-      setRemoteHostName( parseRemoteHostName(logManager, handlerClass) );
-      setTransport( parseTransport(logManager, handlerClass) );    
-      setFormatter( parseFormatter(logManager, handlerClass) );
-      
-    } catch (IllegalArgumentException ex) {
-      System.err.print("Initialization of the syslog logging mechanism failed: ");
-      ex.printStackTrace();
-    }
-  }
 
 
   /**
@@ -188,7 +148,6 @@ public class Configuration {
 
   public void setRemoteHostName(String remoteHostName) {
     if ( remoteHostName != null && !remoteHostName.trim().isEmpty() ) {
-      // TODO: check RFC 3164 on the field's length
       this.remoteHostName = replaceNonUsAsciiAndTrim(remoteHostName, 255);
     }
   }
@@ -265,82 +224,6 @@ public class Configuration {
     message = getSyslogRfc().constructMessage( a );
     
     return message;
-  }
-
-  private static String parseApplicationId(LogManager logManager, Class<? extends Handler> handlerClass) {
-    return logManager.getProperty( handlerClass.getName() + "." + APPLICATION_ID );    
-  }
-
-  private static String parseRemoteHostName(LogManager logManager, Class<? extends Handler> handlerClass) {
-    return logManager.getProperty( handlerClass.getName() + "." + REMOTE_HOSTNAME_PROPERTY );
-  }
-
-  private static Formatter parseFormatter(LogManager logManager, Class<? extends Handler> handlerClass) throws IllegalArgumentException {
-    Formatter formatter = null;
-    Class<? extends Formatter> c2;
-    
-    String formatterClassName = logManager.getProperty( handlerClass.getName() + "." + FORMATTER );
-    if ( formatterClassName != null ) {
-      try {
-        c2 = Class.forName( formatterClassName ).asSubclass( Formatter.class );
-        formatter = c2.newInstance();
-      } catch (  ClassNotFoundException 
-               | InstantiationException 
-               | IllegalAccessException ex) {
-        throw new IllegalArgumentException("Could not initialize java.util.logging Formatter class: "+formatterClassName, ex);
-      }
-    }
-    return formatter;
-  }
-
-
-  private static Transport parseTransport(LogManager logManager, Class<? extends Handler> handlerClass) {
-    Transport result = null;
-    String transportValue = logManager.getProperty( handlerClass.getName() + "." + TRANSPORT_PROPERTY );
-    
-    if ( transportValue != null ) {
-      result = Transport.valueOf(transportValue);
-    }
-    return result;
-  }
-
-
-  private static int parseMaxMessageSize(LogManager logManager, Class<? extends Handler> handlerClass) throws IllegalArgumentException {
-    int p = DEFAULT_MAX_MESSAGE_SIZE;
-    String maxMsgSize = logManager.getProperty( handlerClass.getName() + "." + MAX_MESSAGE_SIZE_PROPERTY );
-    if ( maxMsgSize != null ) {
-      try {
-        p = Integer.parseInt( maxMsgSize );
-      } catch (NumberFormatException ex) {
-        throw new IllegalArgumentException("Parsing max message size: "+maxMsgSize+" for "+handlerClass.getName()+"caused:", ex);
-      }
-    }
-    return p;
-  }
-
-
-  private static int parsePort(LogManager logManager, Class<? extends Handler> handlerClass) throws IllegalArgumentException {
-    int p = DEFAULT_PORT;
-    String portValue = logManager.getProperty( handlerClass.getName() + "." + PORT_PROPERTY );
-    if ( portValue != null ) {
-      try {
-        p = Integer.parseInt( portValue );
-      } catch (NumberFormatException ex) {
-        throw new IllegalArgumentException("Parsing port: "+portValue+" for "+handlerClass.getName()+"caused:", ex);
-      }
-    }
-    return p;
-  }
-
-
-  private static Facility parseFacility(LogManager logManager, Class<? extends Handler> handlerClass) {
-    Facility result = null;
-    String facilityValue = logManager.getProperty( handlerClass.getName() + "." + FACILITY_PROPERTY );
-    
-    if ( facilityValue != null ) {
-      result = Facility.valueOf(facilityValue);
-    } 
-    return result;
   }
 
   /** 
