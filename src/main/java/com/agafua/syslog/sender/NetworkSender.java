@@ -56,7 +56,7 @@ abstract class NetworkSender implements Runnable {
     } catch (Throwable ex) { // waiting for messages or delivery interrupted, leaving the worker thread
       if ( message != null ) { // the last message was not delivered, there might be more messages waiting
         
-        System.err.println("Interruped syslog messages delivery.\nThe following messages will not be delivered");
+        System.err.println("Interruped syslog messages delivery.\nThe following messages will not be delivered:");
         do {
           System.err.println( message );
           message = blockingQueue.poll();

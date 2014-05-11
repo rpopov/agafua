@@ -69,7 +69,13 @@ public class SyslogConnector implements Connector {
 	 */
 	public void publish(Message message) {
     if ( isOpen() ) {
-      blockingQueue.offer(message);
+      try {
+        blockingQueue.put(message);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        
+        System.err.println("The following message will not be delivered:\n"+message);
+      }
     } else {
       throw new IllegalStateException("Expected an open connector");
     }
@@ -80,7 +86,14 @@ public class SyslogConnector implements Connector {
 	 */
 	public void close() throws SecurityException {
 	  if ( isOpen() ) {
-      worker.interrupt();  		
+      worker.interrupt();
+      
+      // wait the worker to complete normally and dump the pending messages. Otherwise they may not be printed due to JVM shutdown.
+      try {
+        worker.join();
+      } catch (InterruptedException ex) {
+        // suppress
+      }
   		worker = null;  // !isOpen
     } else {
       throw new IllegalStateException("Expected an open connector");
