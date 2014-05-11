@@ -70,8 +70,13 @@ public class Configuration {
    * @param blockingQueue not null
    * @return not null thread to send the queue's content
    */
-  public Thread constructWorkerThread(BlockingQueue<Message> blockingQueue) {
-    return new Thread( getTransport().constructSender( this, blockingQueue ));
+  public Thread startNewWorker(BlockingQueue<Message> blockingQueue) {
+    Thread result;
+    
+    result = new Thread( getTransport().constructSender( getRemoteHostName(), getPort(), blockingQueue ));
+    result.start();
+    
+    return result;
   }
 
   /**
@@ -104,7 +109,7 @@ public class Configuration {
   }
 
 
-  public Integer getPort() {
+  public int getPort() {
     return port;
   }
 

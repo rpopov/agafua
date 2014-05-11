@@ -28,77 +28,56 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.concurrent.BlockingQueue;
 
-
 /**
  * Worker for sending of syslog messages by UDP transport.
  */
-class UdpSender implements Runnable {
-	private static final int FAILURE_TIMEOUT = 5000;
+class UdpSender extends NetworkSender implements Runnable {
+  private final String hostName;
 
-	private final String hostName;
-	private final int port;
-	private final Thread worker;
-	private final BlockingQueue<Message> blockingQueue;
+  private final int port;
 
-	public UdpSender(String hostName, int port,
-			BlockingQueue<Message> blockingQueue) {
-		this.hostName = hostName;
-		this.port = port;
-		this.worker = new Thread(new Worker());
-		this.blockingQueue = blockingQueue;
-	}
+  private DatagramSocket socket;
 
-	public void run() {
-		worker.start();
-	}
+  private InetAddress address;
 
-	private class Worker implements Runnable {
+  public UdpSender(String hostName, int port, BlockingQueue<Message> blockingQueue) {
+    super( blockingQueue );
+    this.hostName = hostName;
+    this.port = port; 
+  }
 
-		private DatagramSocket socket;
-		private InetAddress address;
+  /**
+   * @see com.agafua.syslog.sender.NetworkSender#establishConnection()
+   */
+  protected void establishConnection() throws IOException {
+    if ( socket == null ) {
+      address = InetAddress.getByName( hostName );
+      socket = new DatagramSocket();
+    }
+  }
 
-		public void run() {
-			while (true) {
-				try {
-					if (socket == null) {
-						address = InetAddress.getByName(hostName);
-						socket = new DatagramSocket();
-					}
-					Message message = blockingQueue.take();
-					DatagramPacket packet = new DatagramPacket(
-							message.getBytes(), message.getLength(), address,
-							port);
-					socket.send(packet);
-				} catch (InterruptedException e) {
-					releaseResources();
-					return;
-				} catch (IOException e) {
-					releaseResources();
-					try {
-						Thread.sleep(FAILURE_TIMEOUT);
-					} catch (InterruptedException ie) {
-						return;
-					}
 
-				} catch (Throwable t) {
-					releaseResources();
-					try {
-						Thread.sleep(FAILURE_TIMEOUT);
-					} catch (InterruptedException e) {
-						return;
-					}
-				}
-			}
-		}
+  /**
+   * @see com.agafua.syslog.sender.NetworkSender#sendMessage(com.agafua.syslog.sender.Message)
+   */
+  protected void sendMessage(Message message) throws IOException {
+    DatagramPacket packet;
+    
+    packet = new DatagramPacket( message.getBytes(), message.getLength(), address, port );
+    socket.send( packet );
+  }
 
-		private void releaseResources() {
-			try {
-				if (socket != null) {
-					socket.close();
-				}
-			} catch (Throwable t) {
-				socket = null;
-			}
-		}
-	}
+
+  /**
+   * @see com.agafua.syslog.sender.NetworkSender#releaseResources()
+   */
+  protected void releaseResources() {
+    if ( socket != null ) {
+      try {
+        socket.close();
+      } catch (Throwable ex) {
+      } 
+      socket = null;
+    }
+  }
 }

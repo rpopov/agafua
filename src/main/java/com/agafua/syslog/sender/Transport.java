@@ -30,15 +30,15 @@ import java.util.concurrent.BlockingQueue;
 public enum Transport {
 
   UDP {
-    public UdpSender constructSender(Configuration config, BlockingQueue<Message> blockingQueue) {
-      return new UdpSender( config.getRemoteHostName(), config.getPort(), blockingQueue );
+    public UdpSender constructSender(String remoteHost, int remotePort, BlockingQueue<Message> blockingQueue) {
+      return new UdpSender( remoteHost, remotePort, blockingQueue );
     }
   },
   TCP {
-    public TcpSender constructSender(Configuration config, BlockingQueue<Message> blockingQueue) {
-      return new TcpSender( config.getRemoteHostName(), config.getPort(), blockingQueue );
+    public TcpSender constructSender(String remoteHost, int remotePort, BlockingQueue<Message> blockingQueue) {
+      return new TcpSender( remoteHost, remotePort, blockingQueue );
     }
   };
 
-  public abstract Runnable constructSender(Configuration config, BlockingQueue<Message> blockingQueue);
+  public abstract Runnable constructSender(String remoteHost, int remotePort, BlockingQueue<Message> blockingQueue);
 }

@@ -58,8 +58,7 @@ public class SyslogConnector implements Connector {
    */
   public void open() {
     if ( !isOpen() ) {
-      worker = config.constructWorkerThread( blockingQueue );  	
-  		worker.start();
+      worker = config.startNewWorker( blockingQueue );  	// isOpen
     } else {
       throw new IllegalStateException("Expected a not open connector");
     }
@@ -81,10 +80,8 @@ public class SyslogConnector implements Connector {
 	 */
 	public void close() throws SecurityException {
 	  if ( isOpen() ) {
-      worker.interrupt();
-  		blockingQueue.clear();
-  		
-  		worker = null;
+      worker.interrupt();  		
+  		worker = null;  // !isOpen
     } else {
       throw new IllegalStateException("Expected an open connector");
     }

@@ -28,92 +28,63 @@ import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
 
 /*
- Worker for sending syslog messages with TCP transport
+ *  Worker for sending syslog messages with TCP transport
  */
-class TcpSender implements Runnable {
+class TcpSender extends NetworkSender implements Runnable {
 
-	private static final int FAILURE_TIMEOUT = 5000;
+  private final String hostName;
 
-	private final String hostName;
-	private final int port;
-	private final Thread worker;
-	private final BlockingQueue<Message> blockingQueue;
+  private final int port;
 
-	public TcpSender(String hostName, int port,
-			BlockingQueue<Message> blockingQueue) {
-		this.hostName = hostName;
-		this.port = port;
-		this.worker = new Thread(new Worker());
-		this.blockingQueue = blockingQueue;
-	}
 
-	public void run() {
-		worker.start();
-	}
+  private OutputStream os;
+  private Socket socket;
 
-	private class Worker implements Runnable {
 
-		private Socket socket;
-		private OutputStream os;
+  public TcpSender(String hostName, int port, BlockingQueue<Message> blockingQueue) {
+    super( blockingQueue );
+    this.hostName = hostName;
+    this.port = port; 
+  }
 
-		public void run() {
-			while (true) {
-				try {
-					if (os == null) {
-						socket = new Socket(hostName, port);
-						os = socket.getOutputStream();
-					}
-					Message message = blockingQueue.take();
 
-					os.write(message.getBytes(), 0, message.getLength());
-					os.write('\n');
-				} catch (InterruptedException e) {
-					releaseResources();
-					return;
-				} catch (IOException e) {
-					releaseResources();
-					try {
-						Thread.sleep(FAILURE_TIMEOUT);
-					} catch (InterruptedException ie) {
-						return;
-					}
-				} catch (Throwable t) {
-					releaseResources();
-					try {
-						Thread.sleep(FAILURE_TIMEOUT);
-					} catch (InterruptedException ie) {
-						return;
-					}
-				}
-			}
-		}
+  /**
+   * @see com.agafua.syslog.sender.NetworkSender#establishConnection()
+   */
+  protected void establishConnection() throws IOException {
+    if ( os == null ) {
+      socket = new Socket( hostName, port );
+      os = socket.getOutputStream();
+    } 
+  }
 
-		private void releaseResources() {
 
-			try {
-				if (os != null) {
-					os.flush();
-				}
-			} catch (Throwable t) {
+  /**
+   * @see com.agafua.syslog.sender.NetworkSender#sendMessage(com.agafua.syslog.sender.Message)
+   */
+  protected void sendMessage(Message message) throws IOException {
+    os.write( message.getBytes(), 0, message.getLength() );
+    os.flush();
+  }
 
-			}
 
-			try {
-				if (os != null) {
-					os.close();
-				}
-			} catch (Throwable t) {
-
-			}
-			os = null;
-			try {
-				if (socket != null) {
-					socket.close();
-				}
-			} catch (Throwable t) {
-
-			}
-			socket = null;
-		}
-	}
+  /**
+   * @see com.agafua.syslog.sender.NetworkSender#releaseResources()
+   */
+  protected void releaseResources() {
+    if ( os != null ) {
+      try {
+        os.close();
+      } catch (Throwable t) {
+      }
+      os = null;
+    }
+    if ( socket != null ) {
+      try {
+        socket.close();
+      } catch (Throwable t) {
+      }
+      socket = null;
+    }
+  }
 }
