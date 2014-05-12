@@ -5,10 +5,23 @@ Sources:
   http://tools.ietf.org/html/rfc5424
 
 
+RATIONALE: 
+  The RFC3164, RFC5424 state that each message sent to SYSLOG must have a facility. 
+  The java standard loggers do not provide such facilities. 
+  Thus, when logging messages to SYSLOG through the java standard java.utl.logging API, the facility must be 
+  provided by the log's handler itself. 
+  In a single application many facilities may be in use.
+  The standard format and conventions for logging.properties, stated in java.util.logging.LogManager, define a 
+  mechanism to set up uniformly, not allowing difrent handlers of the same class to have different facility assigned. 
+  
+  As a result: We extend the syntax of logging.properties file by using net.ifao.syslog.logger.PciLogManager as
+               a LogManager. It becomes a general mechanism to use bean-style handlers, initialized through corresponding
+               setter methods, instead of self-configuring highly coupled with the configuration standard handlers.
+               We provide the net.ifao.syslog.logger.SyslogHandlerBean as such a bean-style handler. It delivers the
+               original features of com.agafua.syslog.SyslogHandler, now refactored, simplified and tested.
 
-#
-# 1. Configure logging.properties
-#
+1. Configure logging messages to syslog
+
 #***********************************************************
 # Extended syntax (see net.ifao.syslog.logger.PciLogManager) for Java SE logging.properties file:
 #
@@ -24,36 +37,21 @@ Sources:
 # The <handler class>.set<property name>(String) methods should accept 
 #  null and empty values, in case no value is provided in the logging.properties
 #  string representation of the actual values to set (like numbers, enums, etc.)
-#      Recommended is the values' recognition to be case insensitive 
 #  
-# Usage:
-#   In order to use the new syntax of logging.properties add in the java command line add the parameter
-#   -Djava.util.logging.manager=net.ifao.syslog.logger.PciLogManager
-#
-#   Include syslog.logger.jar in classpath.
-#
 #***********************************************************
-# The following are example LOGGERS in logging.properties for PCI DSS events, configured to be transferred to SYSLOG
 
-# Assumption: All events logged through those loggers will be transferred to SYSLOG
+ Usage:
+   Include syslog.logger.jar in classpath.
+   In the java command line add the parameters:
+   -Djava.util.logging.manager=net.ifao.syslog.logger.PciLogManager
+   -Djava.util.logging.config.file=<path>/logging.properties 
 
-pci.logger.kernel.level = ALL
-pci.logger.kernel.handler.names = syslog.kernel
+2. In logging.properties define loggers and handler, for example:
 
-pci.logger.user.level = ALL
-pci.logger.user.handler.names = syslog.user
-
-pci.logger.auth.level = ALL
-pci.logger.auth.handler.names = syslog.auth
-
-pci.logger.security.level = ALL
-pci.logger.security.handler.names = syslog.auth, syslog.security
-
-pci.logger.log.audit.level = ALL
-pci.logger.log.audit.handler.names = syslog.log.audit
-
-pci.logger.log.alert.level = ALL
-pci.logger.log.alert.handler.names = syslog.log.alert
+pci.logger.user.handler.names     = syslog.user
+pci.logger.auth.handler.names     = syslog.auth, syslog.security
+pci.logger.log.audit.handler.names= syslog.log.audit
+pci.logger.log.alert.handler.names= syslog.log.alert
 
 
 # Named PCI DSS handlers to communicate with SYSLOG service:
@@ -61,60 +59,54 @@ pci.logger.log.alert.handler.names = syslog.log.alert
 #  1. Each SYSLOG handler reports (to) a specific SYSLOG FACILITY
 #  2. setup the application ID to the actual application pushing those messages
 
-syslog.kernel.class = net.ifao.syslog.logger.SyslogHandlerBean
-syslog.log.alert.transport = UDP
-syslog.log.audit.remoteHostName = localhost
-syslog.log.audit.port = 514
-syslog.user.applicationId = test-application
-syslog.kernel.facility = KERN
-
-
 syslog.user.class = net.ifao.syslog.logger.SyslogHandlerBean
-syslog.log.alert.transport = UDP
-syslog.log.audit.remoteHostName = localhost
-syslog.log.audit.port = 514
+# Allowed values of net.ifao.syslog.logger.SyslogHandlerBean.transport property are: TCP, UDP (default)
+syslog.user.transport = TCP
+syslog.user.remoteHostName = localhost
+syslog.user.port = 514
 syslog.user.applicationId = test-application
+# Allowed values of net.ifao.syslog.logger.SyslogHandlerBean.facility are: KERN, USER, MAIL, DAEMON, AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, SECURITY, FTP, NTP, LOGAUDIT, LOGALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7
 syslog.user.facility = USER
+# Allowed values of net.ifao.syslog.logger.SyslogHandlerBean.rfc are: RFC3164, RFC5424 (default)
 
 
 syslog.auth.class = net.ifao.syslog.logger.SyslogHandlerBean 
-syslog.log.alert.transport = UDP
-syslog.log.audit.remoteHostName = localhost
-syslog.log.audit.port = 514
+syslog.auth.transport = TCP
+syslog.auth.remoteHostName = localhost
+syslog.auth.port = 514
 syslog.auth.applicationId = test-application
 syslog.auth.facility = AUTH
 
 
 syslog.security.class = net.ifao.syslog.logger.SyslogHandlerBean
-syslog.log.alert.transport = UDP
-syslog.log.audit.remoteHostName = localhost
-syslog.log.audit.port = 514
+syslog.security.transport = TCP
+syslog.security.remoteHostName = localhost
+syslog.security.port = 514
 syslog.security.applicationId = test-application
 syslog.security.facility = SECURITY
 
 
 syslog.log.audit.class = net.ifao.syslog.logger.SyslogHandlerBean
-syslog.log.alert.transport = UDP
+syslog.log.alert.transport = TCP
 syslog.log.audit.remoteHostName = localhost
 syslog.log.audit.port = 514
 syslog.log.audit.applicationId = test-application
 syslog.log.audit.facility = LOGAUDIT
 
+
 syslog.log.alert.class = net.ifao.syslog.logger.SyslogHandlerBean
-syslog.log.alert.transport = UDP
+syslog.log.alert.transport = TCP
 syslog.log.audit.remoteHostName = localhost
 syslog.log.audit.port = 514
 syslog.user.applicationId = test-application
 syslog.log.alert.facility = LOGALERT
-# syslog.log.alert.rfc = RFC3164
 
 
-#
-# 2. Use the specific loggers in the Java application to report specific events to, by using their pure names:
-#    Example:
-#
-#    Logger PCI_LOGGER_USER = Logger.getLogger("pci.logger.user");
-#
-#      and log to them  the standard way:
-#
-#    PCI_LOGGER_USER.log(...);
+3. Use the specific loggers in the Java application to report specific events to, by using their pure names:
+    Example:
+
+    Logger PCI_LOGGER_USER = Logger.getLogger("pci.logger.user");
+
+      and log to them  the standard way:
+
+    PCI_LOGGER_USER.log(...);

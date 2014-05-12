@@ -116,9 +116,10 @@
     <zip file="${dist}/${jar.name}.doc.zip">
        <fileset dir="${home}">
           <include name="build.properties"/>
+          <include name="readme.txt"/>
         </fileset>
-        <fileset dir="${dist}/docs">
-          <include name="**/*"/>
+        <fileset dir="${dist}">
+          <include name="docs/**/*"/>
         </fileset>
     </zip>
   </target>
