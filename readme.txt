@@ -1,3 +1,11 @@
+Sources:
+  http://en.wikipedia.org/wiki/Syslog
+  http://www.ietf.org/rfc/rfc3164.txt
+  http://www.ietf.org/rfc/rfc5424.txt
+  http://tools.ietf.org/html/rfc5424
+
+
+
 #
 # 1. Configure logging.properties
 #
@@ -7,6 +15,8 @@
 # <logger class>.handler.names = comma or space-separated names of handlers
 # 
 # <handler name>.class = qualified name of the handler's class
+#                        for logging to SYSLOG this class is:  net.ifao.syslog.logger.SyslogHandlerBean
+#  
 # <handler name>.level = log level
 # <handler name>.<property name> = any string value
 #   calls the <handler class>.set<property name>(String) with that value
@@ -51,7 +61,7 @@ pci.logger.log.alert.handler.names = syslog.log.alert
 #  1. Each SYSLOG handler reports (to) a specific SYSLOG FACILITY
 #  2. setup the application ID to the actual application pushing those messages
 
-syslog.kernel.class = com.agafua.syslog.SyslogHandlerBean
+syslog.kernel.class = net.ifao.syslog.logger.SyslogHandlerBean
 syslog.log.alert.transport = UDP
 syslog.log.audit.remoteHostName = localhost
 syslog.log.audit.port = 514
@@ -59,7 +69,7 @@ syslog.user.applicationId = test-application
 syslog.kernel.facility = KERN
 
 
-syslog.user.class = com.agafua.syslog.SyslogHandlerBean
+syslog.user.class = net.ifao.syslog.logger.SyslogHandlerBean
 syslog.log.alert.transport = UDP
 syslog.log.audit.remoteHostName = localhost
 syslog.log.audit.port = 514
@@ -67,7 +77,7 @@ syslog.user.applicationId = test-application
 syslog.user.facility = USER
 
 
-syslog.auth.class = com.agafua.syslog.SyslogHandlerBean 
+syslog.auth.class = net.ifao.syslog.logger.SyslogHandlerBean 
 syslog.log.alert.transport = UDP
 syslog.log.audit.remoteHostName = localhost
 syslog.log.audit.port = 514
@@ -75,7 +85,7 @@ syslog.auth.applicationId = test-application
 syslog.auth.facility = AUTH
 
 
-syslog.security.class = com.agafua.syslog.SyslogHandlerBean
+syslog.security.class = net.ifao.syslog.logger.SyslogHandlerBean
 syslog.log.alert.transport = UDP
 syslog.log.audit.remoteHostName = localhost
 syslog.log.audit.port = 514
@@ -83,14 +93,14 @@ syslog.security.applicationId = test-application
 syslog.security.facility = SECURITY
 
 
-syslog.log.audit.class = com.agafua.syslog.SyslogHandlerBean
+syslog.log.audit.class = net.ifao.syslog.logger.SyslogHandlerBean
 syslog.log.alert.transport = UDP
 syslog.log.audit.remoteHostName = localhost
 syslog.log.audit.port = 514
 syslog.log.audit.applicationId = test-application
 syslog.log.audit.facility = LOGAUDIT
 
-syslog.log.alert.class = com.agafua.syslog.SyslogHandlerBean
+syslog.log.alert.class = net.ifao.syslog.logger.SyslogHandlerBean
 syslog.log.alert.transport = UDP
 syslog.log.audit.remoteHostName = localhost
 syslog.log.audit.port = 514

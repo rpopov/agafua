@@ -5,10 +5,11 @@
  * 
  * Created on 09.05.2014
  */
-package com.agafua.syslog;
+package net.ifao.syslog.logger;
 
 import java.util.logging.Formatter;
 
+import com.agafua.syslog.BaseSyslogHandler;
 import com.agafua.syslog.sender.Facility;
 import com.agafua.syslog.sender.SyslogRfc;
 import com.agafua.syslog.sender.Transport;
@@ -56,8 +57,34 @@ public class SyslogHandlerBean extends BaseSyslogHandler {
 	}
 	
   /**
-   * Use bean-style initialization 
+   * Use bean-style initialization. Allowed values: 
+   *   KERN,
+   *   USER,
+   *   MAIL,
+   *   DAEMON,
+   *   AUTH,
+   *   SYSLOG,
+   *   LPR,
+   *   NEWS,
+   *   UUCP,
+   *   CRON,
+   *   SECURITY,
+   *   FTP,
+   *   NTP,
+   *   LOGAUDIT,
+   *   LOGALERT,
+   *   CLOCK,
+   *   LOCAL0,
+   *   LOCAL1,
+   *   LOCAL2,
+   *   LOCAL3,
+   *   LOCAL4,
+   *   LOCAL5,
+   *   LOCAL6,
+   *   LOCAL7
+   *   
    * @param facilityValue
+   * @see Facility
    */
   public void setFacility(String facilityValue) {
     if ( facilityValue != null && !facilityValue.isEmpty() ) {
@@ -66,8 +93,11 @@ public class SyslogHandlerBean extends BaseSyslogHandler {
   }
 	
   /**
-   * Use bean-style initialization 
+   * Use bean-style initialization. Allowed values:
+   *   UDT, 
+   *   TCP
    * @param transportValue
+   * @see Transport
    */
   public void setTransport(String transportValue) throws IllegalArgumentException {
     if ( transportValue != null && !transportValue.isEmpty() ) {
@@ -76,8 +106,11 @@ public class SyslogHandlerBean extends BaseSyslogHandler {
   }
 	
   /**
-   * Use bean-style initialization 
+   * Use bean-style initialization. Allowed values:
+   *   RFC3164,
+   *   RFC5424
    * @param transportValue
+   * @see SyslogRfc
    */
   public void setRfc(String rfcName) throws IllegalArgumentException {
     if ( rfcName != null && !rfcName.isEmpty() ) {

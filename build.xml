@@ -20,7 +20,7 @@
     </fileset>
   </path>
 
-  <target name="all" depends="clean,compile,jar,test"/>
+  <target name="all" depends="clean,compile,jar,test,doc"/>
 
   <target name="clean">
     <delete dir="${classes}" failonerror="false"/>
@@ -104,10 +104,22 @@
        
        <batchtest>
          <fileset dir="${test.java}">
-           <include name="**/*Test*.java"/>
+           <include name="**/*Vegas*Test*.java"/>
            <exclude name="**/AllTests.java"/>
          </fileset>           
        </batchtest>
      </junit> 
+  </target>
+  
+  <target name="doc">
+    <javadoc sourcepath="${src.java}" destdir="${dist}/docs" classpathref="classpath" additionalparam="-notimestamp"/>
+    <zip file="${dist}/${jar.name}.doc.zip">
+       <fileset dir="${home}">
+          <include name="build.properties"/>
+        </fileset>
+        <fileset dir="${dist}/docs">
+          <include name="**/*"/>
+        </fileset>
+    </zip>
   </target>
 </project>

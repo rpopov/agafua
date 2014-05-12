@@ -15,10 +15,10 @@ import java.util.logging.Logger;
 import junit.framework.TestCase;
 
 /**
- * Test a failing connection and shutdown handling
+ * Test a connection to a real host with syslog configured for vegas project's purposes  
  * @author rpopov
  */
-public class PciLogManagerAlertCommunicationTest extends TestCase {
+public class PciLogManagerAlertCommunicationVegasTest extends TestCase {
 
   /**
    * Just lookup the loggers
@@ -28,7 +28,7 @@ public class PciLogManagerAlertCommunicationTest extends TestCase {
     Logger logger; 
     
     /// There must be no communication established
-    logger = Logger.getLogger("pci.logger.log.alert");
+    logger = Logger.getLogger("vegas.pci.logger.log.alert");
     
     logger.log(Level.INFO, "Test message1");
     
@@ -36,13 +36,6 @@ public class PciLogManagerAlertCommunicationTest extends TestCase {
     
     // the root logger should be used and the client is not interrupted
     assertTrue("Success", true);
-    System.err.println("verifiy manually in STDERR that the 'Test message1' was reported as not delivered");
-  }
-
-  /**
-   * @see junit.framework.TestCase#setUp()
-   */
-  protected void setUp() throws Exception {
-    System.err.println("Note: EXPECTED are exceptions printed in the system error and this DOES NOT FAIL the tests");
+    System.err.println("verifiy manually in STDERR that NO messages were reporeted as not delivered");
   }
 }

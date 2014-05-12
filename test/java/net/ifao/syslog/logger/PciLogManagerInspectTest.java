@@ -29,7 +29,7 @@ public class PciLogManagerInspectTest extends TestCase {
     // check there is a syslog handler for that logger
     syslogHandlerFound = false;
     for (Handler handler: logger.getHandlers()) {
-      syslogHandlerFound |= handler instanceof com.agafua.syslog.SyslogHandlerBean;
+      syslogHandlerFound |= handler instanceof net.ifao.syslog.logger.SyslogHandlerBean;
     }
     assertTrue("Expected a syslog handler bound to the logger", syslogHandlerFound);
   }  

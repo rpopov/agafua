@@ -27,6 +27,7 @@ import java.util.logging.Logger;
  * &lt;logger class&gt;.handler.names = comma or space-separated names of handlers
  * 
  * &lt;handler name&gt;.class = qualified name of the handler's class
+ *                              In the specific case of SYSLOG logger: net.ifao.syslog.logger.SyslogHandlerBean
  * &lt;handler name&gt;.level = log level
  * &lt;handler name&gt;.&lt;property name&gt; = any string value
  *   calls the &lt;handler class&gt;.set&lt;property name&gt;(String) with that value
@@ -40,6 +41,7 @@ import java.util.logging.Logger;
  *   add in the java command line add the parameter
  *   <b>-Djava.util.logging.manager=net.ifao.syslog.logger.PciLogManager</b>
  * </pre>  
+ * @see net.ifao.syslog.logger.SyslogHandlerBean
  * @author rpopov
  */
 public class PciLogManager extends LogManager {

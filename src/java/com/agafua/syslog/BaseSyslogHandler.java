@@ -36,7 +36,7 @@ import com.agafua.syslog.sender.SyslogConnector;
  * Its configuration must be filled in by the first call to publish()
  * @see #publish(LogRecord) 
  */
-abstract class BaseSyslogHandler extends Handler {
+public abstract class BaseSyslogHandler extends Handler {
 
   private final Configuration config;
   
