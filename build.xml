@@ -1,0 +1,104 @@
+<project name="syslog" default="all" basedir=".">
+
+  <property name="home"    value="."/>
+  <property name="src.java"   value="${home}/src/java"/>
+  <property name="test.java"  value="${home}/test/java"/>
+
+  <property name="classes" value="${home}/classes"/>
+  <property name="lib"     value="${home}/lib"/>
+  <property name="dist"    value="${home}/dist"/>
+  <property name="doc"     value="${home}/doc"/>
+
+  <property name="jar.name"   value="syslog.logger"/>
+
+  <property name="debug"  value="yes"/> <!-- Remove this to use the production (no debug) libraries -->
+
+  <path id="classpath">
+    <pathelement location="${classes}"/>
+    <fileset dir="${lib}" erroronmissingdir="false">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="all" depends="clean,compile,jar,test"/>
+
+  <target name="clean">
+    <delete dir="${classes}" failonerror="false"/>
+    <delete dir="${dist}"  failonerror="false"/>
+    <delete dir="${doc}/api"  failonerror="false"/>
+    <mkdir  dir="${classes}"/>
+    <mkdir dir="${dist}"/>
+  </target>
+
+	<target name="compile" depends="clean">
+    <mkdir dir="${classes}"/>
+    <javac srcdir="${src.java}"
+           destdir="${classes}"
+           debug="true"
+           debuglevel="lines,vars,source"
+           optimize="false"
+           deprecation="true"
+           source="1.7"
+           classpathref="classpath" />
+	</target>
+
+  <target name="jar" depends="compile">
+    <jar jarfile="${dist}/${jar.name}.jar">
+      <fileset dir="${classes}">
+        <include name="**/*.class"/>
+      </fileset>
+    </jar>
+
+    <copy todir="${dist}">
+      <fileset dir="${lib}" erroronmissingdir="false">
+        <include name="*.jar"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${dist}">
+      <fileset dir="${basedir}">
+        <include name="readme.txt"/>
+      </fileset>
+    </copy>
+
+	</target>
+
+  <target name="compile.tests" depends="compile">
+    <mkdir dir="${classes}"/>
+    <javac srcdir="${test.java}"
+           destdir="${classes}"
+           debug="true"
+           debuglevel="lines,vars,source"
+           optimize="false"
+           deprecation="true"
+           source="1.7"
+           classpathref="classpath" />
+  </target>  
+  
+  <target name="test" depends="jar, compile.tests">
+    <property name="debug.port" value="6666"/>
+    <property name="debug.suspend" value="n"/>
+    
+     <junit fork="true" showoutput="true" printsummary="true"> <!-- outputtoformatters="false" -->
+       <classpath>
+         <pathelement location="${classes}"/>
+         <fileset dir="${dist}">
+           <include name="**/*.jar"/>
+         </fileset>
+       </classpath>
+       
+       <jvmarg value="-Djava.util.logging.manager=net.ifao.syslog.logger.PciLogManager"/>
+       <jvmarg value="-Djava.util.logging.config.file=${home}/test/resources/logging.properties"/>
+       <jvmarg line="-Xdebug -Xrunjdwp:transport=dt_socket,address=${debug.port},server=y,suspend=${debug.suspend}"/>
+       
+       <formatter type="plain"/>
+       
+       <batchtest>
+         <fileset dir="${test.java}">
+           <include name="**/*Test*.java"/>
+           <exclude name="**/AllTests.java"/>
+         </fileset>           
+       </batchtest>
+     </junit> 
+  </target>
+</project>

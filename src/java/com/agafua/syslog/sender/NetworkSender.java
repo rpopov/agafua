@@ -1,9 +1,7 @@
 /*
  * Copyright (c) i:FAO AG 2014. All Rights Reserved.
  *
- * This SOURCE CODE FILE, which has been provided by i:FAO AG as part
- * of a product of i:FAO AG for use ONLY by licensed users of the product,
- * includes CONFIDENTIAL and PROPRIETARY information.
+ * This SOURCE CODE FILE is provided under Eclipse Public License 1.0
  * 
  * Created on 11.05.2014
  */
@@ -81,6 +79,7 @@ abstract class NetworkSender implements Runnable {
         // successfully delivered
         message = null;
       } catch (IOException ex) {
+        System.err.print("Network communication "+describeConnection()+" caused:");
         ex.printStackTrace();
         
         releaseResources();
@@ -89,6 +88,11 @@ abstract class NetworkSender implements Runnable {
       }
     } while ( message != null );
   }
+
+  /**
+   * @return a non-empty description of the communication channel to establish/already established
+   */
+  protected  abstract String describeConnection();
 
   /**
    * Establishes all means to communicate. It makes sure sendMessage() is safe to call. 

@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) i:FAO AG 2014. All Rights Reserved.
+ *
+ * This SOURCE CODE FILE is provided under Eclipse Public License 1.0
+ * 
+ * Created on 09.05.2014
+ */
 package com.agafua.syslog;
 
 import java.util.logging.Formatter;

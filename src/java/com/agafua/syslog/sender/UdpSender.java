@@ -23,39 +23,37 @@ THE SOFTWARE.
 package com.agafua.syslog.sender;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.concurrent.BlockingQueue;
 
-/*
- *  Worker for sending syslog messages with TCP transport
+/**
+ * Worker for sending of syslog messages by UDP transport.
  */
-class TcpSender extends NetworkSender implements Runnable {
-
+class UdpSender extends NetworkSender implements Runnable {
   private final String hostName;
 
   private final int port;
 
+  private DatagramSocket socket;
 
-  private OutputStream os;
-  private Socket socket;
+  private InetAddress address;
 
-
-  public TcpSender(String hostName, int port, BlockingQueue<Message> blockingQueue) {
+  public UdpSender(String hostName, int port, BlockingQueue<Message> blockingQueue) {
     super( blockingQueue );
     this.hostName = hostName;
     this.port = port; 
   }
 
-
   /**
    * @see com.agafua.syslog.sender.NetworkSender#establishConnection()
    */
   protected void establishConnection() throws IOException {
-    if ( os == null ) {
-      socket = new Socket( hostName, port );
-      os = socket.getOutputStream();
-    } 
+    if ( socket == null ) {
+      address = InetAddress.getByName( hostName );
+      socket = new DatagramSocket();
+    }
   }
 
 
@@ -63,8 +61,10 @@ class TcpSender extends NetworkSender implements Runnable {
    * @see com.agafua.syslog.sender.NetworkSender#sendMessage(com.agafua.syslog.sender.Message)
    */
   protected void sendMessage(Message message) throws IOException {
-    os.write( message.getBytes(), 0, message.getLength() );
-    os.flush();
+    DatagramPacket packet;
+    
+    packet = new DatagramPacket( message.getBytes(), message.getLength(), address, port );
+    socket.send( packet );
   }
 
 
@@ -72,19 +72,20 @@ class TcpSender extends NetworkSender implements Runnable {
    * @see com.agafua.syslog.sender.NetworkSender#releaseResources()
    */
   protected void releaseResources() {
-    if ( os != null ) {
-      try {
-        os.close();
-      } catch (Throwable t) {
-      }
-      os = null;
-    }
     if ( socket != null ) {
       try {
         socket.close();
-      } catch (Throwable t) {
-      }
+      } catch (Throwable ex) {
+      } 
       socket = null;
     }
   }
+  
+
+  /**
+   * @see com.agafua.syslog.sender.NetworkSender#describeConnection()
+   */
+  protected String describeConnection() {
+    return "UDP connection to host:"+hostName+" and port:"+port;
+  }  
 }

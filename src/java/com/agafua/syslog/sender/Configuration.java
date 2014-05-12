@@ -5,7 +5,8 @@ import java.lang.management.RuntimeMXBean;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
-import java.util.logging.SimpleFormatter;
+
+import com.agafua.syslog.PlainFormatter;
 
 /**
  * All configuration parameter for the Syslog connectivity.
@@ -63,7 +64,7 @@ public class Configuration {
   /**
    * Not null 
    */
-  private Formatter formatter = new SimpleFormatter();
+  private Formatter formatter = new PlainFormatter();
 
 
   /**
