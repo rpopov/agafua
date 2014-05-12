@@ -20,6 +20,8 @@
 #   In order to use the new syntax of logging.properties add in the java command line add the parameter
 #   -Djava.util.logging.manager=net.ifao.syslog.logger.PciLogManager
 #
+#   Include syslog.logger.jar in classpath.
+#
 #***********************************************************
 # The following are example LOGGERS in logging.properties for PCI DSS events, configured to be transferred to SYSLOG
 
