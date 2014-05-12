@@ -43,10 +43,19 @@
 	</target>
 
   <target name="jar" depends="compile">
-    <jar jarfile="${dist}/${jar.name}.jar">
+    <property file="build.properties"/>
+
+   <jar jarfile="${dist}/${jar.name}.jar">
+     <fileset dir="${home}">
+        <include name="build.properties"/>
+      </fileset>
       <fileset dir="${classes}">
         <include name="**/*.class"/>
       </fileset>
+      <manifest>
+        <attribute name="Title" value="${jar.name}"/>
+        <attribute name="Version" value="${build.version}"/>
+      </manifest>
     </jar>
 
     <copy todir="${dist}">
