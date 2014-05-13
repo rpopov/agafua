@@ -27,6 +27,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.LogRecord;
+
+import net.ifao.pci.logging.NetworkSender;
 
 /**
  * Worker for sending of syslog messages by UDP transport.
@@ -47,7 +50,7 @@ class UdpSender extends NetworkSender implements Runnable {
   }
 
   /**
-   * @see com.agafua.syslog.sender.NetworkSender#establishConnection()
+   * @see net.ifao.pci.logging.NetworkSender#establishConnection()
    */
   protected void establishConnection() throws IOException {
     if ( socket == null ) {
@@ -58,10 +61,11 @@ class UdpSender extends NetworkSender implements Runnable {
 
 
   /**
-   * @see com.agafua.syslog.sender.NetworkSender#sendMessage(com.agafua.syslog.sender.Message)
+   * @see net.ifao.pci.logging.NetworkSender#sendMessage(LogRecord)
    */
-  protected void sendMessage(Message message) throws IOException {
+  protected void sendMessage(LogRecord record) throws IOException {
     DatagramPacket packet;
+    message = config.constructMessage( record, "-" );  
     
     packet = new DatagramPacket( message.getBytes(), message.getLength(), address, port );
     socket.send( packet );
@@ -69,7 +73,7 @@ class UdpSender extends NetworkSender implements Runnable {
 
 
   /**
-   * @see com.agafua.syslog.sender.NetworkSender#releaseResources()
+   * @see net.ifao.pci.logging.NetworkSender#releaseResources()
    */
   protected void releaseResources() {
     if ( socket != null ) {
@@ -83,7 +87,7 @@ class UdpSender extends NetworkSender implements Runnable {
   
 
   /**
-   * @see com.agafua.syslog.sender.NetworkSender#describeConnection()
+   * @see net.ifao.pci.logging.NetworkSender#describeConnection()
    */
   protected String describeConnection() {
     return "UDP connection to host:"+hostName+" and port:"+port;

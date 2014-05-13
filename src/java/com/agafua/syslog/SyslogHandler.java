@@ -25,6 +25,9 @@ package com.agafua.syslog;
 import java.util.logging.Formatter;
 import java.util.logging.LogManager;
 
+import net.ifao.pci.logging.AsynchronousHandler;
+import net.ifao.pci.logging.syslog.SyslogConfiguration;
+
 import com.agafua.syslog.sender.Facility;
 import com.agafua.syslog.sender.SyslogRfc;
 import com.agafua.syslog.sender.Transport;
@@ -33,7 +36,7 @@ import com.agafua.syslog.sender.Transport;
  * Implementation of java.util.logging.Handler for syslog protocol.
  * Uses the standard convention of java.util.logging for initialization through the LogManager
  */
-public class SyslogHandler extends BaseSyslogHandler {
+public class SyslogHandler extends AsynchronousHandler<SyslogConfiguration> {
 
 	// Property names:
   private static final String TRANSPORT_PROPERTY = "transport";
@@ -50,7 +53,9 @@ public class SyslogHandler extends BaseSyslogHandler {
 	 * Read the handler configuration from the standard LogManager
 	 */
 	public SyslogHandler() {
-	  LogManager logManager;
+	  super(new SyslogConfiguration());
+	  
+	  LogManager logManager;	  
 	  
 	  logManager = LogManager.getLogManager();
 	  
@@ -72,11 +77,11 @@ public class SyslogHandler extends BaseSyslogHandler {
 	}
 
   private void parseApplicationId(LogManager logManager) {
-    getConfig().setApplicationId( logManager.getProperty( this.getClass().getName() + "." + APPLICATION_ID ) );    
+    getConfiguration().setApplicationId( logManager.getProperty( this.getClass().getName() + "." + APPLICATION_ID ) );    
   }
 
   private void parseRemoteHostName(LogManager logManager) {
-    getConfig().setRemoteHostName( logManager.getProperty( this.getClass().getName() + "." + REMOTE_HOSTNAME_PROPERTY ));
+    getConfiguration().setRemoteHostName( logManager.getProperty( this.getClass().getName() + "." + REMOTE_HOSTNAME_PROPERTY ));
   }
 
   private void parseFormatter(LogManager logManager) throws IllegalArgumentException {
@@ -89,7 +94,7 @@ public class SyslogHandler extends BaseSyslogHandler {
         c2 = Class.forName( formatterClassName ).asSubclass( Formatter.class );
         formatter = c2.newInstance();
         
-        getConfig().setFormatter( formatter );
+        getConfiguration().setFormatter( formatter );
       } catch (  ClassNotFoundException 
                | InstantiationException 
                | IllegalAccessException ex) {
@@ -105,7 +110,7 @@ public class SyslogHandler extends BaseSyslogHandler {
     if ( transportValue != null ) {
       result = Transport.valueOf(transportValue);
       
-      getConfig().setTransport( result );
+      getConfiguration().setTransport( result );
     }
   }
 
@@ -116,7 +121,7 @@ public class SyslogHandler extends BaseSyslogHandler {
     if ( rfcValue != null ) {
       result = SyslogRfc.valueOf(rfcValue);
       
-      getConfig().setSyslogRfc( result );
+      getConfiguration().setSyslogRfc( result );
     }
   }
 
@@ -127,7 +132,7 @@ public class SyslogHandler extends BaseSyslogHandler {
     if ( maxMsgSize != null ) {
       try {
         p = Integer.parseInt( maxMsgSize );        
-        getConfig().setMaxMessageSize( p );
+        getConfiguration().setMaxMessageSize( p );
         
       } catch (NumberFormatException ex) {
         throw new IllegalArgumentException("Parsing max message size: "+maxMsgSize+" for "+this.getClass().getName()+"caused:", ex);
@@ -143,7 +148,7 @@ public class SyslogHandler extends BaseSyslogHandler {
       try {
         p = Integer.parseInt( portValue );
         
-        getConfig().setPort( p );
+        getConfiguration().setPort( p );
       } catch (NumberFormatException ex) {
         throw new IllegalArgumentException("Parsing port: "+portValue+" for "+this.getClass().getName()+"caused:", ex);
       }
@@ -157,7 +162,7 @@ public class SyslogHandler extends BaseSyslogHandler {
     if ( facilityValue != null ) {
       result = Facility.valueOf(facilityValue);
       
-      getConfig().setFacility( result );
+      getConfiguration().setFacility( result );
     } 
   }
 }

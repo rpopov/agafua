@@ -26,11 +26,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.LogRecord;
+
+import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.syslog.SyslogConfiguration;
 
 /*
  *  Worker for sending syslog messages with TCP transport
  */
-class TcpSender extends NetworkSender implements Runnable {
+class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
 
   private final String hostName;
 
@@ -41,15 +45,15 @@ class TcpSender extends NetworkSender implements Runnable {
   private Socket socket;
 
 
-  public TcpSender(String hostName, int port, BlockingQueue<Message> blockingQueue) {
-    super( blockingQueue );
-    this.hostName = hostName;
-    this.port = port; 
+  public TcpSender(Connector<SyslogConfiguration> connector) {
+    super( connector );
+    this.hostName = connector.getConfiguration().getRemoteHostName();
+    this.port = connector.getConfiguration().getPort(); 
   }
 
 
   /**
-   * @see com.agafua.syslog.sender.NetworkSender#establishConnection()
+   * @see net.ifao.pci.logging.NetworkSender#establishConnection()
    */
   protected void establishConnection() throws IOException {
     if ( os == null ) {
@@ -60,16 +64,18 @@ class TcpSender extends NetworkSender implements Runnable {
 
 
   /**
-   * @see com.agafua.syslog.sender.NetworkSender#sendMessage(com.agafua.syslog.sender.Message)
+   * @see net.ifao.pci.logging.NetworkSender#sendMessage(LogRecord)
    */
-  protected void sendMessage(Message message) throws IOException {
+  protected void sendMessage(LogRecord record) throws IOException {
+    message = config.constructMessage( record, "-" );  
+
     os.write( message.getBytes(), 0, message.getLength() );
     os.flush();
   }
 
 
   /**
-   * @see com.agafua.syslog.sender.NetworkSender#releaseResources()
+   * @see net.ifao.pci.logging.NetworkSender#releaseResources()
    */
   protected void releaseResources() {
     if ( os != null ) {
@@ -90,7 +96,7 @@ class TcpSender extends NetworkSender implements Runnable {
 
 
   /**
-   * @see com.agafua.syslog.sender.NetworkSender#describeConnection()
+   * @see net.ifao.pci.logging.NetworkSender#describeConnection()
    */
   protected String describeConnection() {
     return "TCP connection to host:"+hostName+" and port:"+port;

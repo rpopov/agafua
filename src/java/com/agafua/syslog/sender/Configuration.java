@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) i:FAO AG 2014. All Rights Reserved.
+ *
+ * This SOURCE CODE FILE, which has been provided by i:FAO AG as part
+ * of a product of i:FAO AG for use ONLY by licensed users of the product,
+ * includes CONFIDENTIAL and PROPRIETARY information.
+ * 
+ * Created on 13.05.2014
+ */
 package com.agafua.syslog.sender;
 
 import java.lang.management.ManagementFactory;
@@ -8,20 +17,15 @@ import java.util.logging.LogRecord;
 
 import com.agafua.syslog.PlainFormatter;
 
-/**
- * All configuration parameter for the Syslog connectivity.
- * Call its set* to fill it in before use.
- */
-public class Configuration {
+import net.ifao.pci.logging.NetworkSender;
 
-  // Default recommendations:
+public abstract class Configuration {
+
   private static final String LOCALHOST = "localhost";
   private static final String DEFAULT_HOST_NAME = "0.0.0.0";
-  private static final int DEFAULT_PORT = 514;
   private static final int MIN_PORT = 0;
   private static final int MAX_PORT = 65535;
-  private static final int DEFAULT_MAX_MESSAGE_SIZE = 1024;
-
+  
   /**
    * Not null 
    */
@@ -32,14 +36,7 @@ public class Configuration {
    */
   private static final String localHostName = determineLocalHostName();
   
-  private int maxMessageSize = DEFAULT_MAX_MESSAGE_SIZE;
-  private int port = DEFAULT_PORT;
-
-  /**
-   * Not null 
-   */
-  private SyslogRfc syslogRfc = SyslogRfc.RFC5424;
-  
+  private int port;
   
   /**
    * Not null 
@@ -50,156 +47,81 @@ public class Configuration {
    * Not null 
    */
   private String remoteHostName = LOCALHOST;
-
-  /**
-   * Not null 
-   */
-  private Transport transport = Transport.UDP;
-  
-  /**
-   * Not null 
-   */
-  private Facility facility = Facility.USER;
   
   /**
    * Not null 
    */
   private Formatter formatter = new PlainFormatter();
-
-
-  /**
-   * @param blockingQueue not null
-   * @return not null thread to send the queue's content
-   */
-  public Thread startNewWorker(BlockingQueue<Message> blockingQueue) {
-    Thread result;
-    
-    result = new Thread( getTransport().constructSender( getRemoteHostName(), getPort(), blockingQueue ));
-    result.start();
-    
-    return result;
-  }
+  static final int LOG_QUEUE_SIZE = 1024;
 
   /**
-   * Construct a message according to all settings held in this configuration,
-   * ready to be sent to syslog  
-   * @param record 
-   * @param messageId the non-null ID of the message
-   * @return a non-null message to send in syslog
+   * Construct a sender of the appropriate class for this configuration.
+   * The class might be defined by the class of the configuration itself of 
+   * depending on specific parameters it contains.
+   * @param blockingQueue
+   * @return
    */
-  public Message constructMessage(LogRecord record, String messageId) {
-    Message message;
-    
-    message = getSyslogRfc().constructMessage( this, record, messageId );
-    
-    return message;
-  }
-
-  public Facility getFacility() {
-    return facility;
-  }
-
-
+  protected abstract NetworkSender constructSender(BlockingQueue<LogRecord> blockingQueue);
+  
   /**
-   * @return not null 
+   * @return configured 
    */
-  public void setFacility(Facility facility) {
-    if ( facility != null ) {
-      this.facility = facility;
-    }
-  }
-
-
-  public int getPort() {
+  public final int getPort() {
     return port;
   }
 
-
-  public void setPort(int port) {
+  /**
+   * @param port the remore port to communicate to
+   */
+  public final void setPort(int port) {
     if ( port >= MIN_PORT && port < MAX_PORT ) {
       this.port = port;
     }
   }
 
-
   /**
    * @return not null 
    */
-  public SyslogRfc getSyslogRfc() {
-    return syslogRfc;
-  }
-
-
-  public void setSyslogRfc(SyslogRfc syslogVersion) {
-    if (syslogVersion != null) {
-      this.syslogRfc = syslogVersion;
-    }
-  }
-
-  /**
-   * @return not null 
-   */
-  public String getApplicationId() {
+  public final String getApplicationId() {
     return applicationId;
   }
 
-
-  public void setApplicationId(String applicationId) {
+  /**
+   * @param applicationId the non-null name of the application sending the log messages
+   */
+  public final void setApplicationId(String applicationId) {
     if ( applicationId != null && !applicationId.trim().isEmpty() ) {
       // The RFC allows max. 48 chars for the app id, so cut it on demand
       this.applicationId = replaceNonUsAsciiAndTrim(applicationId, 48);
     }
   }
 
-
   /**
    * @return not null 
    */
-  public String getLocalHostName() {
+  public final String getLocalHostName() {
     return localHostName;
   }
 
   /**
    * @return not null 
    */
-  public String getRemoteHostName() {
+  public final String getRemoteHostName() {
     return remoteHostName;
   }
 
-
-  public void setRemoteHostName(String remoteHostName) {
+  public final void setRemoteHostName(String remoteHostName) {
     if ( remoteHostName != null && !remoteHostName.trim().isEmpty() ) {
       this.remoteHostName = replaceNonUsAsciiAndTrim(remoteHostName, 255);
     }
   }
 
-
-  public int getMaxMessageSize() {
-    return maxMessageSize;
-  }
-
-
-  public void setMaxMessageSize(int maxMessageSize) {
-    if ( maxMessageSize > 0 && maxMessageSize <= 0xFFFF ) {
-      this.maxMessageSize = maxMessageSize;
-    }
-  }
-
-
   /**
    * @return not null 
    */
-  public Transport getTransport() {
-    return transport;
+  public final Formatter getFormatter() {
+    return formatter;
   }
-
-
-  public void setTransport(Transport transport) {
-    if ( transport != null ) {
-      this.transport = transport;
-    }
-  }
-
 
   /**
    * @see #formatter
@@ -210,20 +132,28 @@ public class Configuration {
     }
   }
 
-
   /**
    * @return not null 
    */
-  public final Formatter getFormatter() {
-    return formatter;
+  public final String getProcessId() {
+  	return processId;
   }
 
-
   /**
-   * @return not null 
+   * TODO State the purpose of this method in one statement
+   * TODO Describe the method's purpose
+   * TODO Describe any requirements and pre-conditions
+   * TODO Mention any concurrency considerations
+   * TODO Describe the non-local objects modified in this method and any side effects
+   * TODO Describe the method's effects and the post-condition state
+   * TODO Describe the method’s usage. Provide examples if appropriate.
+   * 
+   * @return
+   * 
+   * NOTES: 
    */
-  public String getProcessId() {
-  	return processId;
+  public static int getQueueSize() {
+    return LOG_QUEUE_SIZE;
   }
 
   /** 
@@ -231,11 +161,10 @@ public class Configuration {
    */
   private static String replaceNonUsAsciiAndTrim(String s, int maxLength) {
     s = s.substring(0, Math.min(s.length(), maxLength));
-
+  
     return s.replaceAll("[\\x80-\\xFF]", ".");
   }
-  
-  
+
   /**
    * Static initializer, called only once to identify the current host name assuming this is a slow operation. 
    * @return
@@ -251,7 +180,7 @@ public class Configuration {
       System.err.print("Localhost lookup failed with: ");
       e.printStackTrace();
       System.err.println("Trying to use the host's address ");
-
+  
       // Try to determine localhost by IPv4 InetAddress
       try {
         result = java.net.Inet4Address.getLocalHost().getHostAddress();
@@ -265,7 +194,6 @@ public class Configuration {
     }
     return result;
   }
-
 
   /**
    * Static initializer, called only once to identify the current process ID assuming this is a slow operation. 
@@ -282,10 +210,10 @@ public class Configuration {
       // This might not work on any operating system.
       // We return "-" of not successful.
       bean = ManagementFactory.getRuntimeMXBean();
-
+  
       jvmName = bean.getName();
       pid = jvmName.split( "@" )[ 0 ];
-
+  
       if ( pid != null && !pid.isEmpty() ) {
         processId = pid;
       }
@@ -294,5 +222,6 @@ public class Configuration {
       ex.printStackTrace();
     }
     return processId;
-  }  
+  }
+
 }

@@ -26,12 +26,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.LogRecord;
 
+import net.ifao.pci.logging.syslog.SyslogConfiguration;
+
 /**
  * Message for sending by worker implementation.
  */
 public class MessageRFC5424 extends AbstractMessage {
 
-	public MessageRFC5424(Configuration configuration, LogRecord record, String messageId) {	  
+	public MessageRFC5424(SyslogConfiguration configuration, LogRecord record, String messageId) {	  
 		super(configuration, record, messageId);
 		
     print( calculatePriority( configuration ) ); // ABNF RFC5424: PRI

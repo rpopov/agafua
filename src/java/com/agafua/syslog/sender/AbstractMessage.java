@@ -3,6 +3,8 @@ package com.agafua.syslog.sender;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+import net.ifao.pci.logging.syslog.SyslogConfiguration;
+
 public abstract class AbstractMessage implements Message {
 
   private final LogRecord logRecord;
@@ -15,7 +17,7 @@ public abstract class AbstractMessage implements Message {
   private String messageId;
   private String message;
 
-	public AbstractMessage(Configuration configuration, LogRecord record, String messageId) {
+	public AbstractMessage(SyslogConfiguration configuration, LogRecord record, String messageId) {
 	  this.logRecord = record;
   	
   	this.value = new byte[ configuration.getMaxMessageSize() ];
@@ -104,7 +106,7 @@ public abstract class AbstractMessage implements Message {
   }
   
   
-  protected String calculatePriority(Configuration config) {
+  protected String calculatePriority(SyslogConfiguration config) {
     int code = (config.getFacility().getId() << 3) + getSeverity().getLevel();
     return String.format("<%d>", code);
   

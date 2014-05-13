@@ -5,7 +5,7 @@
  * 
  * Created on 09.05.2014
  */
-package net.ifao.syslog.logger;
+package net.ifao.pci.logging;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  *   add in the java command line add the parameter
  *   <b>-Djava.util.logging.manager=net.ifao.syslog.logger.PciLogManager</b>
  * </pre>  
- * @see net.ifao.syslog.logger.SyslogHandlerBean
+ * @see net.ifao.pci.logging.syslog.SyslogHandlerBean
  * @author rpopov
  */
 public class PciLogManager extends LogManager {

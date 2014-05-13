@@ -26,6 +26,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.logging.LogRecord;
 
+import net.ifao.pci.logging.syslog.SyslogConfiguration;
+
 /**
  * Message for sending by worker implementation.
  */
@@ -33,7 +35,7 @@ class MessageRFC3164 extends AbstractMessage {
 
   protected static final String[] MONTH_NAMES = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-	public MessageRFC3164(Configuration configuration, LogRecord record, String messageId) {
+	public MessageRFC3164(SyslogConfiguration configuration, LogRecord record, String messageId) {
 		super(configuration, record, messageId);
 		
     print( calculatePriority( configuration ) ); 
