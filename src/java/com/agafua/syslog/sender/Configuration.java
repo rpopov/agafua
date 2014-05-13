@@ -1,12 +1,3 @@
-/*
- * Copyright (c) i:FAO AG 2014. All Rights Reserved.
- *
- * This SOURCE CODE FILE, which has been provided by i:FAO AG as part
- * of a product of i:FAO AG for use ONLY by licensed users of the product,
- * includes CONFIDENTIAL and PROPRIETARY information.
- * 
- * Created on 13.05.2014
- */
 package com.agafua.syslog.sender;
 
 import java.lang.management.ManagementFactory;
@@ -17,12 +8,26 @@ import net.ifao.pci.logging.NetworkSender;
 
 import com.agafua.syslog.PlainFormatter;
 
+/**
+ * Holds all configuration parameters for a handler and its connector.
+ * Based on the original Configuration class by Oliver Probst 
+ */
 public abstract class Configuration {
 
   private static final String LOCALHOST = "localhost";
   private static final String DEFAULT_HOST_NAME = "0.0.0.0";
   private static final int MIN_PORT = 0;
   private static final int MAX_PORT = 65535;
+  
+  /**
+   * Time to wait before attempt again to connect 
+   */
+  private static final int FAILURE_TIMEOUT = 5000;
+  
+  /**
+   * The size of the buffer (queue) of records to log
+   */
+  private static final int BUFFER_SIZE = 1024;
   
   /**
    * Not null 
@@ -34,7 +39,7 @@ public abstract class Configuration {
    */
   private static final String localHostName = determineLocalHostName();
   
-  private static final int LOG_QUEUE_SIZE = 1024;
+  
   private int port;
   
   /**
@@ -51,14 +56,13 @@ public abstract class Configuration {
    * Not null 
    */
   private Formatter formatter = new PlainFormatter();
-  public static final int FAILURE_TIMEOUT = 5000;
-  
   
   /**
    * Construct a sender of the appropriate class for this configuration.
    * The class might be defined by the class of the configuration itself of 
    * depending on specific parameters it contains.
-   * @param connector that holds the pending records and holds this specific configuration 
+   * @param connector that holds the pending records and holds this specific configuration
+   * @param <C> must be the same as this.class 
    * @return a non-null sender to process the records in the connector
    */
   protected abstract <C extends Configuration> NetworkSender<C> constructSender(Connector<C> connector);
@@ -110,6 +114,9 @@ public abstract class Configuration {
     return remoteHostName;
   }
 
+  /**
+   * @param remoteHostName the non-null name of the host to connect 
+   */
   public final void setRemoteHostName(String remoteHostName) {
     if ( remoteHostName != null && !remoteHostName.trim().isEmpty() ) {
       this.remoteHostName = replaceNonUsAsciiAndTrim(remoteHostName, 255);
@@ -124,7 +131,7 @@ public abstract class Configuration {
   }
 
   /**
-   * @see #formatter
+   * @param formatter the non-null formatter to apply to all transferred records 
    */
   public final void setFormatter(Formatter formatter) {
     if ( formatter != null ) {
@@ -140,37 +147,17 @@ public abstract class Configuration {
   }
 
   /**
-   * TODO State the purpose of this method in one statement
-   * TODO Describe the method's purpose
-   * TODO Describe any requirements and pre-conditions
-   * TODO Mention any concurrency considerations
-   * TODO Describe the non-local objects modified in this method and any side effects
-   * TODO Describe the method's effects and the post-condition state
-   * TODO Describe the method’s usage. Provide examples if appropriate.
-   * 
-   * @return
-   * 
-   * NOTES: 
+   * @return the time in milliseconds to wait before reconnecting
    */
-  public int getSeepOnFailure() {
+  public final int getSeepOnFailure() {
     return FAILURE_TIMEOUT;
   }
 
   /**
-   * TODO State the purpose of this method in one statement
-   * TODO Describe the method's purpose
-   * TODO Describe any requirements and pre-conditions
-   * TODO Mention any concurrency considerations
-   * TODO Describe the non-local objects modified in this method and any side effects
-   * TODO Describe the method's effects and the post-condition state
-   * TODO Describe the method’s usage. Provide examples if appropriate.
-   * 
-   * @return
-   * 
-   * NOTES: 
+   * @return size of the buffer of log records to transfer
    */
-  public static int getQueueSize() {
-    return LOG_QUEUE_SIZE;
+  public final int getQueueSize() {
+    return BUFFER_SIZE;
   }
 
   /** 

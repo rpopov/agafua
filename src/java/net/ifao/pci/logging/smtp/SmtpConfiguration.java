@@ -13,7 +13,7 @@ public class SmtpConfiguration extends Configuration {
   /**
    * @see com.agafua.syslog.sender.BasicConfiguration#constructSender(Connector<C>)
    */
-  protected <C extends Configuration> NetworkSender<C> constructSender(Connector connector) {
-    return new SmtpSender( connector );
+  protected <C extends Configuration> NetworkSender<C> constructSender(Connector<C> connector) {
+    return (NetworkSender<C>) new SmtpSender( (Connector<SmtpConfiguration>) connector );
   }  
 }

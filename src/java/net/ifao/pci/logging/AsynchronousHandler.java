@@ -42,8 +42,6 @@ import com.agafua.syslog.sender.Connector;
  */
 public abstract class AsynchronousHandler<C extends Configuration> extends Handler {
 
-  private final C config;
-  
 	private final Connector<C> connector;
 
 	/**
@@ -51,8 +49,7 @@ public abstract class AsynchronousHandler<C extends Configuration> extends Handl
 	 * @param configuration 
    */
   protected AsynchronousHandler(C configuration) {
-    this.config = configuration;
-    this.connector = new Connector<C>(config);      
+    this.connector = new Connector<C>( configuration );      
   }
 
   /**
@@ -81,7 +78,7 @@ public abstract class AsynchronousHandler<C extends Configuration> extends Handl
    * @see #config
    */
   protected final C getConfiguration() {
-    return config;
+    return connector.getConfiguration();
   }
 
   /**
