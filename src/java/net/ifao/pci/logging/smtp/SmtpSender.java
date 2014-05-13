@@ -10,53 +10,76 @@
 package net.ifao.pci.logging.smtp;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.logging.LogRecord;
 
-import com.agafua.syslog.sender.Connector;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.MimeMessage;
 
 import net.ifao.pci.logging.NetworkSender;
 
+import com.agafua.syslog.sender.Connector;
+
 /**
- * 
- * TODO Describe the purpose of this class
- * TODO Describe the class' usage
- * TODO Mention any concurrency considerations
- * TODO List all known bugs
- *
+ * Asynchronously send the logged records as email messages 
  * @author rpopov
- * @version $Revision$ $Date$
  */
 public class SmtpSender extends NetworkSender<SmtpConfiguration> {
 
+  /**
+   * Cache the mail session
+   */
+  private Session mailSession; 
+  
+  /**
+   * @param connector
+   */
   public SmtpSender(Connector<SmtpConfiguration> connector) {
     super( connector );
   }
 
 
-  protected String describeConnection() {
-    //TODO Complete this.
-    return null;
-  }
-
-
-  @Override
   protected void establishConnection() throws IOException {
-    //TODO Complete this.
-
+    if ( mailSession == null ) {
+      mailSession = getConfiguration().constructSession();
+    }
   }
 
-
-  @Override
+  /**
+   * Send the record as an email
+   * @see net.ifao.pci.logging.NetworkSender#sendMessage(java.util.logging.LogRecord)
+   */
   protected void sendMessage(LogRecord record) throws IOException {
-    //TODO Complete this.
+    MimeMessage message; 
 
+    try {
+      message = getConfiguration().createMessage( mailSession );
+            
+      message.setSentDate(new Date(record.getMillis()));
+      
+      message.setText( getConfiguration().getFormatter().format( record ) );
+      
+      Transport.send(message);      
+    } catch (Exception ex) {
+      throw new IOException(ex);
+    }
   }
 
 
-  @Override
+  /**
+   * @see net.ifao.pci.logging.NetworkSender#releaseResources()
+   */
   protected void releaseResources() {
-    //TODO Complete this.
-
+    // no need of releasing the session
   }
 
+  /**
+   * @see net.ifao.pci.logging.NetworkSender#describeConnection()
+   */
+  protected String describeConnection() {
+    return  "Sending email to host:"+getConfiguration().getRemoteHostName()
+           +" and port:"+ getConfiguration().getPort()
+           +" using protocol:"+getConfiguration().getProtocol();
+  }
 }
