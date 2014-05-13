@@ -11,13 +11,11 @@ package com.agafua.syslog.sender;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
-import java.util.concurrent.BlockingQueue;
 import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-
-import com.agafua.syslog.PlainFormatter;
 
 import net.ifao.pci.logging.NetworkSender;
+
+import com.agafua.syslog.PlainFormatter;
 
 public abstract class Configuration {
 
@@ -36,6 +34,7 @@ public abstract class Configuration {
    */
   private static final String localHostName = determineLocalHostName();
   
+  private static final int LOG_QUEUE_SIZE = 1024;
   private int port;
   
   /**
@@ -52,16 +51,17 @@ public abstract class Configuration {
    * Not null 
    */
   private Formatter formatter = new PlainFormatter();
-  static final int LOG_QUEUE_SIZE = 1024;
-
+  public static final int FAILURE_TIMEOUT = 5000;
+  
+  
   /**
    * Construct a sender of the appropriate class for this configuration.
    * The class might be defined by the class of the configuration itself of 
    * depending on specific parameters it contains.
-   * @param blockingQueue
-   * @return
+   * @param connector that holds the pending records and holds this specific configuration 
+   * @return a non-null sender to process the records in the connector
    */
-  protected abstract NetworkSender constructSender(BlockingQueue<LogRecord> blockingQueue);
+  protected abstract <C extends Configuration> NetworkSender<C> constructSender(Connector<C> connector);
   
   /**
    * @return configured 
@@ -137,6 +137,23 @@ public abstract class Configuration {
    */
   public final String getProcessId() {
   	return processId;
+  }
+
+  /**
+   * TODO State the purpose of this method in one statement
+   * TODO Describe the method's purpose
+   * TODO Describe any requirements and pre-conditions
+   * TODO Mention any concurrency considerations
+   * TODO Describe the non-local objects modified in this method and any side effects
+   * TODO Describe the method's effects and the post-condition state
+   * TODO Describe the method’s usage. Provide examples if appropriate.
+   * 
+   * @return
+   * 
+   * NOTES: 
+   */
+  public int getSeepOnFailure() {
+    return FAILURE_TIMEOUT;
   }
 
   /**

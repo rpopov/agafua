@@ -1,11 +1,11 @@
 package net.ifao.pci.logging.syslog;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.logging.LogRecord;
 
 import net.ifao.pci.logging.NetworkSender;
 
 import com.agafua.syslog.sender.Configuration;
+import com.agafua.syslog.sender.Connector;
 import com.agafua.syslog.sender.Facility;
 import com.agafua.syslog.sender.Message;
 import com.agafua.syslog.sender.SyslogRfc;
@@ -45,10 +45,10 @@ public class SyslogConfiguration extends Configuration {
   }
 
   /**
-   * @see com.agafua.syslog.sender.Configuration#constructSender(BlockingQueue)
+   * @see com.agafua.syslog.sender.Configuration#constructSender(Connector<C>)
    */
-  protected NetworkSender constructSender(BlockingQueue<LogRecord> blockingQueue) {
-    return transport.constructSender( remoteHostName, remotePort, blockingQueue );
+  protected <C extends Configuration> NetworkSender<C> constructSender(Connector<C> connector) {
+    return (NetworkSender<C>) transport.constructSender( (Connector<SyslogConfiguration>) connector );
   }
 
   /**

@@ -26,27 +26,21 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.concurrent.BlockingQueue;
 import java.util.logging.LogRecord;
 
 import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.syslog.SyslogConfiguration;
 
 /**
  * Worker for sending of syslog messages by UDP transport.
  */
-class UdpSender extends NetworkSender implements Runnable {
-  private final String hostName;
-
-  private final int port;
+class UdpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
 
   private DatagramSocket socket;
-
   private InetAddress address;
 
-  public UdpSender(String hostName, int port, BlockingQueue<Message> blockingQueue) {
-    super( blockingQueue );
-    this.hostName = hostName;
-    this.port = port; 
+  public UdpSender(Connector<SyslogConfiguration> connector) {
+    super( connector );
   }
 
   /**
@@ -54,7 +48,7 @@ class UdpSender extends NetworkSender implements Runnable {
    */
   protected void establishConnection() throws IOException {
     if ( socket == null ) {
-      address = InetAddress.getByName( hostName );
+      address = InetAddress.getByName( getConfiguration().getRemoteHostName() );
       socket = new DatagramSocket();
     }
   }
@@ -65,9 +59,14 @@ class UdpSender extends NetworkSender implements Runnable {
    */
   protected void sendMessage(LogRecord record) throws IOException {
     DatagramPacket packet;
-    message = config.constructMessage( record, "-" );  
+    Message message;
     
-    packet = new DatagramPacket( message.getBytes(), message.getLength(), address, port );
+    message = getConfiguration().constructMessage( record, "-" );  
+    
+    packet = new DatagramPacket( message.getBytes(), 
+                                 message.getLength(), 
+                                 address, 
+                                 getConfiguration().getPort() );
     socket.send( packet );
   }
 
@@ -90,6 +89,6 @@ class UdpSender extends NetworkSender implements Runnable {
    * @see net.ifao.pci.logging.NetworkSender#describeConnection()
    */
   protected String describeConnection() {
-    return "UDP connection to host:"+hostName+" and port:"+port;
+    return "UDP connection to host:"+getConfiguration().getRemoteHostName()+" and port:"+getConfiguration().getPort();
   }  
 }

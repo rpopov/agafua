@@ -59,7 +59,7 @@ public final class Connector<C extends Configuration> {
    */
   public void open() {
     if ( !isOpen() ) {
-      worker = new Thread( configuration.constructSender( blockingQueue ));
+      worker = new Thread( configuration.constructSender( this ));
       worker.start(); // isOpen
     } else {
       throw new IllegalStateException("Expected a not open connector");

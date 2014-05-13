@@ -22,10 +22,8 @@ THE SOFTWARE.
 
 package com.agafua.syslog.sender;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.logging.LogRecord;
-
 import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.syslog.SyslogConfiguration;
 
 /**
  * Enumeration of transports for syslog protocol.
@@ -33,15 +31,15 @@ import net.ifao.pci.logging.NetworkSender;
 public enum Transport {
 
   UDP {
-    public UdpSender constructSender(String remoteHost, int remotePort, BlockingQueue<LogRecord> blockingQueue) {
-      return new UdpSender( remoteHost, remotePort, blockingQueue );
+    public UdpSender constructSender(Connector<SyslogConfiguration> connector) {
+      return new UdpSender( connector );
     }
   },
   TCP {
-    public TcpSender constructSender(String remoteHost, int remotePort, BlockingQueue<LogRecord> blockingQueue) {
-      return new TcpSender( remoteHost, remotePort, blockingQueue );
+    public TcpSender constructSender(Connector<SyslogConfiguration> connector) {
+      return new TcpSender( connector );
     }
   };
 
-  public abstract NetworkSender constructSender(String remoteHost, int remotePort, BlockingQueue<LogRecord> blockingQueue);
+  public abstract NetworkSender<SyslogConfiguration> constructSender(Connector<SyslogConfiguration> connector);
 }

@@ -21,8 +21,6 @@ import com.agafua.syslog.sender.Connector;
  */
 public abstract class NetworkSender<C extends Configuration> implements Runnable {
 
-  private static final int FAILURE_TIMEOUT = 5000;
-  
   private final Connector<C> connector;
 
   /**
@@ -67,13 +65,6 @@ public abstract class NetworkSender<C extends Configuration> implements Runnable
   }
 
   /**
-   * @return the non-null configuration stating the details of the records' delivery. To be used in subclasses. 
-   */
-  protected final C getConfiguration() {
-    return connector.getConfiguration();  
-  }
-  
-  /**
    * Do whatever is takes to deliver the log record
    * @param record not null
    * @throws InterruptedException when the thread is interrupted explicitly, considering the log record 
@@ -93,11 +84,18 @@ public abstract class NetworkSender<C extends Configuration> implements Runnable
         
         releaseResources();
         
-        Thread.sleep( FAILURE_TIMEOUT );
+        Thread.sleep( getConfiguration().getSeepOnFailure() );
       }
     } while ( record != null );
   }
 
+  /**
+   * @return the non-null configuration stating the details of the records' delivery. To be used in subclasses. 
+   */
+  protected final C getConfiguration() {
+    return connector.getConfiguration();  
+  }
+  
   /**
    * @return a non-empty description of the communication channel to establish/already established
    */

@@ -1,22 +1,19 @@
 package net.ifao.pci.logging.smtp;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.logging.LogRecord;
-
 import net.ifao.pci.logging.NetworkSender;
 
 import com.agafua.syslog.sender.Configuration;
+import com.agafua.syslog.sender.Connector;
 
 /**
- * All configuration parameter for the Syslog connectivity.
- * Call its set* to fill it in before use.
+ * Specific configuration parameters to deliver log records by email
  */
 public class SmtpConfiguration extends Configuration {
 
   /**
-   * @see com.agafua.syslog.sender.BasicConfiguration#constructSender(BlockingQueue)
+   * @see com.agafua.syslog.sender.BasicConfiguration#constructSender(Connector<C>)
    */
-  protected NetworkSender constructSender(BlockingQueue<LogRecord> blockingQueue) {
-    return 1;
+  protected <C extends Configuration> NetworkSender<C> constructSender(Connector connector) {
+    return new SmtpSender( connector );
   }  
 }

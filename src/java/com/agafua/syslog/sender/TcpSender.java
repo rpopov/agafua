@@ -25,7 +25,6 @@ package com.agafua.syslog.sender;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.concurrent.BlockingQueue;
 import java.util.logging.LogRecord;
 
 import net.ifao.pci.logging.NetworkSender;
@@ -36,19 +35,12 @@ import net.ifao.pci.logging.syslog.SyslogConfiguration;
  */
 class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
 
-  private final String hostName;
-
-  private final int port;
-
-
   private OutputStream os;
   private Socket socket;
 
 
   public TcpSender(Connector<SyslogConfiguration> connector) {
     super( connector );
-    this.hostName = connector.getConfiguration().getRemoteHostName();
-    this.port = connector.getConfiguration().getPort(); 
   }
 
 
@@ -57,7 +49,8 @@ class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
    */
   protected void establishConnection() throws IOException {
     if ( os == null ) {
-      socket = new Socket( hostName, port );
+      socket = new Socket( getConfiguration().getRemoteHostName(), 
+                           getConfiguration().getPort() );
       os = socket.getOutputStream();
     } 
   }
@@ -67,7 +60,9 @@ class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
    * @see net.ifao.pci.logging.NetworkSender#sendMessage(LogRecord)
    */
   protected void sendMessage(LogRecord record) throws IOException {
-    message = config.constructMessage( record, "-" );  
+    Message message;
+    
+    message = getConfiguration().constructMessage( record, "-" );  
 
     os.write( message.getBytes(), 0, message.getLength() );
     os.flush();
@@ -99,6 +94,6 @@ class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
    * @see net.ifao.pci.logging.NetworkSender#describeConnection()
    */
   protected String describeConnection() {
-    return "TCP connection to host:"+hostName+" and port:"+port;
+    return "TCP connection to host:"+getConfiguration().getRemoteHostName()+" and port:"+ getConfiguration().getPort();
   }
 }
