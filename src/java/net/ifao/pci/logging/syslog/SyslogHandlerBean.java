@@ -7,8 +7,10 @@
  */
 package net.ifao.pci.logging.syslog;
 
-import net.ifao.pci.logging.AsynchronousHandler;
+import net.ifao.pci.logging.PciLogManager;
+import net.ifao.pci.logging.internal.AsynchronousHandlerBean;
 
+import com.agafua.syslog.SyslogHandler;
 import com.agafua.syslog.sender.Facility;
 import com.agafua.syslog.sender.SyslogRfc;
 import com.agafua.syslog.sender.Transport;
@@ -16,9 +18,24 @@ import com.agafua.syslog.sender.Transport;
 /**
  * Implementation of java.util.logging.Handler for syslog protocol.
  * Requires explicit initialization through the setter methods.
- * The initialization is assumed complete when publish() is called the first time
+ * Requires PciLogManager to be used instead of the standard java.util.logging.LogMandager,
+ * which allows multiple handler instances configured separately, in contrast to the common 
+ * configuration the standard imposes.
+ * Handler configuration properties (see {@link PciLogManager}):<ul>
+ * <li>class = net.ifao.pci.logging.syslog.SyslogHandlerBean
+ * <li>applicationId - the unique application name that generated the logged message
+ * <li>facility - the SYSLOG facility (see RFC3164, i.e. event kind/class) to report the message to
+ * <li>formatter - the class name of the log record formatter to apply to the text content of the message
+ * <li>maxMsgSize - the maximum size of the message to generate (RFC3164 states 1024, RFC5424 imposes no restriction)
+ * <li>port - the port to connect the SYSLOG at. default: 514
+ * <li>host - the host of the SYSLOG service to connect to
+ * <li>rfc - states the message requisites and format when reported to SYSLOG. Values: RFC3164, RFC5424 (default)
+ * <li>transport - TCP (default) or UDP protocol to connect SYSLOG service
+ * </ul>
+ * @see PciLogManager
+ * @see SyslogHandler
  */
-public class SyslogHandlerBean extends AsynchronousHandler<SyslogConfiguration> {
+public class SyslogHandlerBean extends AsynchronousHandlerBean<SyslogConfiguration> {
 
   public SyslogHandlerBean() {
     super( new SyslogConfiguration() );

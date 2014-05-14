@@ -5,7 +5,7 @@
  * 
  * Created on 11.05.2014
  */
-package net.ifao.pci.logging;
+package net.ifao.pci.logging.internal;
 
 import java.io.IOException;
 import java.util.logging.LogRecord;
@@ -55,7 +55,7 @@ public abstract class NetworkSender<C extends Configuration> implements Runnable
         
         System.err.println("Interruped delivery.\nThe following log records will not be delivered:");
         do {
-          System.err.println( record );
+          System.err.println( formatPrintable(record) );
           record = connector.poll();
         } while ( record != null);
       }
@@ -115,6 +115,14 @@ public abstract class NetworkSender<C extends Configuration> implements Runnable
    * @throws IOException when sending the record failed
    */
   protected abstract void sendMessage(LogRecord record) throws IOException;
+
+  /**
+   * Format the log record so it could be printed in text log/console as a backup solution
+   * if it could not be delivered 
+   * @param record
+   * @return human-readable string representation of the record
+   */
+  protected abstract String formatPrintable(LogRecord record);
 
   /**
    * Release any communication resources, if any were allocated. 

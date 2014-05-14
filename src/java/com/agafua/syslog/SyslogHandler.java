@@ -25,7 +25,7 @@ package com.agafua.syslog;
 import java.util.logging.Formatter;
 import java.util.logging.LogManager;
 
-import net.ifao.pci.logging.AsynchronousHandler;
+import net.ifao.pci.logging.internal.AsynchronousHandler;
 import net.ifao.pci.logging.syslog.SyslogConfiguration;
 
 import com.agafua.syslog.sender.Facility;
@@ -34,7 +34,17 @@ import com.agafua.syslog.sender.Transport;
 
 /**
  * Implementation of java.util.logging.Handler for syslog protocol.
- * Uses the standard convention of java.util.logging for initialization through the LogManager
+ * Uses the standard convention of java.util.logging for initialization through the LogManager.
+ * Configuration properties:<ul>
+ * <li>com.agafua.syslog.SyslogHandler.applicationId - the unique application name that generated the logged message
+ * <li>com.agafua.syslog.SyslogHandler.facility - the SYSLOG facility (see RFC3164, i.e. event kind/class) to report the message to
+ * <li>com.agafua.syslog.SyslogHandler.formatter - the class name of the log record formatter to apply to the text content of the message
+ * <li>com.agafua.syslog.SyslogHandler.maxMsgSize - the maximum size of the message to generate (RFC3164 states 1024, RFC5424 imposes no restriction)
+ * <li>com.agafua.syslog.SyslogHandler.port - the port to connect the SYSLOG at. default: 514
+ * <li>com.agafua.syslog.SyslogHandler.remoteHostname - the host of the SYSLOG service to connect to
+ * <li>com.agafua.syslog.SyslogHandler.rfc - states the message requisites and format when reported to SYSLOG. Values: RFC3164, RFC5424 (default)
+ * <li>com.agafua.syslog.SyslogHandler.transport - TCP (default) or UDP protocol to connect SYSLOG service
+ * </ul>
  */
 public class SyslogHandler extends AsynchronousHandler<SyslogConfiguration> {
 
@@ -81,7 +91,7 @@ public class SyslogHandler extends AsynchronousHandler<SyslogConfiguration> {
   }
 
   private void parseRemoteHostName(LogManager logManager) {
-    getConfiguration().setRemoteHostName( logManager.getProperty( this.getClass().getName() + "." + REMOTE_HOSTNAME_PROPERTY ));
+    getConfiguration().setHost( logManager.getProperty( this.getClass().getName() + "." + REMOTE_HOSTNAME_PROPERTY ));
   }
 
   private void parseFormatter(LogManager logManager) throws IllegalArgumentException {

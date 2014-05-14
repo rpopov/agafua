@@ -4,7 +4,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.logging.Formatter;
 
-import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.internal.NetworkSender;
 
 import com.agafua.syslog.PlainFormatter;
 
@@ -110,14 +110,14 @@ public abstract class Configuration {
   /**
    * @return not null 
    */
-  public final String getRemoteHostName() {
+  public final String getHost() {
     return remoteHostName;
   }
 
   /**
    * @param remoteHostName the non-null name of the host to connect 
    */
-  public final void setRemoteHostName(String remoteHostName) {
+  public final void setHost(String remoteHostName) {
     if ( remoteHostName != null && !remoteHostName.trim().isEmpty() ) {
       this.remoteHostName = replaceNonUsAsciiAndTrim(remoteHostName, 255);
     }

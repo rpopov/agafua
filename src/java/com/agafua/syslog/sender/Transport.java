@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 package com.agafua.syslog.sender;
 
-import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.internal.NetworkSender;
 import net.ifao.pci.logging.syslog.SyslogConfiguration;
 
 /**
