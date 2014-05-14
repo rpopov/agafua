@@ -51,7 +51,7 @@ Configuring the PCI-related loggers
 # <logger class>.handler.names = comma or space-separated names of handlers
 # 
 # <handler name>.class = qualified name of the handler's class
-#                        for logging to SYSLOG this class is:  net.ifao.syslog.logger.SyslogHandlerBean
+#                        for logging to SYSLOG this class is:  net.ifao.pci.logging.syslog.SyslogHandlerBean
 #  
 # <handler name>.level = log level
 # <handler name>.<property name> = any string value
@@ -83,18 +83,18 @@ pci.logger.log.alert.handler.names= syslog.log.alert, email.alert
 #  1. Each SYSLOG handler reports (to) a specific SYSLOG FACILITY
 #  2. setup the application ID to the actual application pushing those messages
 
-syslog.user.class = net.ifao.syslog.logger.SyslogHandlerBean
-# Allowed values of net.ifao.syslog.logger.SyslogHandlerBean.transport property are: TCP, UDP (default)
+syslog.user.class = net.ifao.pci.logging.syslog.SyslogHandlerBean
+# Allowed values of net.ifao.pci.logging.syslog.SyslogHandlerBean.transport property are: TCP, UDP (default)
 syslog.user.transport = TCP
 syslog.user.host = localhost
 syslog.user.port = 514
 syslog.user.applicationId = test-application
-# Allowed values of net.ifao.syslog.logger.SyslogHandlerBean.facility are: KERN, USER, MAIL, DAEMON, AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, SECURITY, FTP, NTP, LOGAUDIT, LOGALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7
+# Allowed values of net.ifao.pci.logging.syslog.SyslogHandlerBean.facility are: KERN, USER, MAIL, DAEMON, AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, SECURITY, FTP, NTP, LOGAUDIT, LOGALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7
 syslog.user.facility = USER
-# Allowed values of net.ifao.syslog.logger.SyslogHandlerBean.rfc are: RFC3164, RFC5424 (default)
+# Allowed values of net.ifao.pci.logging.syslog.SyslogHandlerBean.rfc are: RFC3164, RFC5424 (default)
 
 
-syslog.auth.class = net.ifao.syslog.logger.SyslogHandlerBean 
+syslog.auth.class = net.ifao.pci.logging.syslog.SyslogHandlerBean 
 syslog.auth.transport = TCP
 syslog.auth.host = localhost
 syslog.auth.port = 514
@@ -102,7 +102,7 @@ syslog.auth.applicationId = test-application
 syslog.auth.facility = AUTH
 
 
-syslog.security.class = net.ifao.syslog.logger.SyslogHandlerBean
+syslog.security.class = net.ifao.pci.logging.syslog.SyslogHandlerBean
 syslog.security.transport = TCP
 syslog.security.host = localhost
 syslog.security.port = 514
@@ -110,7 +110,7 @@ syslog.security.applicationId = test-application
 syslog.security.facility = SECURITY
 
 
-syslog.log.audit.class = net.ifao.syslog.logger.SyslogHandlerBean
+syslog.log.audit.class = net.ifao.pci.logging.syslog.SyslogHandlerBean
 syslog.log.audit.transport = TCP
 syslog.log.audit.host = localhost
 syslog.log.audit.port = 514
@@ -118,7 +118,7 @@ syslog.log.audit.applicationId = test-application
 syslog.log.audit.facility = LOGAUDIT
 
 
-syslog.log.alert.class = net.ifao.syslog.logger.SyslogHandlerBean
+syslog.log.alert.class = net.ifao.pci.logging.syslog.SyslogHandlerBean
 syslog.log.alert.transport = TCP
 syslog.log.alert.host = localhost
 syslog.log.alert.port = 514
@@ -132,7 +132,7 @@ email.alert.protocol = smtp
 email.alert.port = 465
 email.alert.subject = 
 email.alert.to = <to whom to deliver the messages>
-email.alert.user = <set the user to log in the email server>
+email.alert.user = <set the user to log in the email server. default: applicationId>
 
 
 3. Use the specific loggers in the Java application to report specific events to, by using their pure names:

@@ -99,20 +99,16 @@
        
        <jvmarg value="-Djava.util.logging.manager=net.ifao.pci.logging.PciLogManager"/>
        <jvmarg value="-Djava.util.logging.config.file=${home}/test/resources/logging.properties"/>
-       <jvmarg line="-Xdebug -Xrunjdwp:transport=dt_socket,address=${debug.port},server=y,suspend=${debug.suspend}"/>
-       
-       <!-- 
-         provide the password for email delivery test through the system property
-         This way it is not needded to store the password in the test configuration file
-         -->
-       <jvmarg value="-Dmail.password=${env.test.password}"/>
-       
+       <jvmarg line="-Xdebug -Xrunjdwp:transport=dt_socket,address=${debug.port},server=y,suspend=${debug.suspend}"/>       
+<!--         
+       <jvmarg value="-Dmail.debug=true"/>
+       <jvmarg value="-Dmail.debug.auth=true"/>
+  -->     
        <formatter type="plain"/>
        
        <batchtest>
          <fileset dir="${test.java}">
            <include name="**/*Test*.java"/>
-           <exclude name="**/AllTests.java"/>
          </fileset>           
        </batchtest>
      </junit> 

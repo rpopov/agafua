@@ -52,8 +52,9 @@ public abstract class NetworkSender<C extends Configuration> implements Runnable
       }
     } catch (Throwable ex) { // waiting for record or delivery interrupted, leaving the worker thread
       if ( record != null ) { // the last record was not delivered, there might be more record waiting
+        ex.printStackTrace();
         
-        System.err.println("Interruped delivery.\nThe following log records will not be delivered:");
+        System.err.println("Interruped delivery.\nThe following log records will not be delivered:");        
         do {
           System.err.println( formatPrintable(record) );
           record = connector.poll();

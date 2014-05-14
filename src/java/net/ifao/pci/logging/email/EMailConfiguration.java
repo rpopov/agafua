@@ -28,8 +28,9 @@ import com.agafua.syslog.sender.Connector;
  * Allows providing as system properties from the command line, any parameters to the 
  * underlying Java Mail component, as of http://www.oracle.com/technetwork/java/javamail/index.html
  * The property values provided in the configuration file override those provided as system properties:<ul>
- * <li> <b>remoteHostName</b> configuration property overrides the  <b>mail.host</b> system property, if ones specified
- * <li> <b>smtpUsername</b> configuration property overrides the <b>mail.user</b> system property, if ones provided
+ * <li> <b>host</b> configuration property overrides the  <b>mail.host</b> system property, if ones specified
+ * <li> <b>user</b> configuration property overrides the <b>mail.user</b> system property, if ones provided.
+ *      If not provided, the applicationId is used instead.     
  * <li> <b>protocol</b> configuration property overrides <b>mail.transport.protocol</b> system property  
  * </ul>
  */
@@ -55,17 +56,26 @@ public class EMailConfiguration extends Configuration {
     props = new Properties( System.getProperties() );
 
     put( props, "mail.host", getHost() );
-    put( props, "mail.user", getUser() );
+    
+    if ( getUser() != null ) {
+      put( props, "mail.user", getUser() );
+    } else { 
+      put( props, "mail.user", getApplicationId() );      
+    }
     put( props, "mail.transport.protocol", getProtocol() );
 
-    auth = new javax.mail.Authenticator() {
-      /**
-       * @see javax.mail.Authenticator#getPasswordAuthentication()
-       */
-      protected PasswordAuthentication getPasswordAuthentication() {
-        return new PasswordAuthentication( getUser(), getPassword() );
-      }
-    };
+    if (getPassword() == null) { // no authentication 
+      auth = null;      
+    } else {
+      auth = new javax.mail.Authenticator() {
+        /**
+         * @see javax.mail.Authenticator#getPasswordAuthentication()
+         */
+        protected PasswordAuthentication getPasswordAuthentication() {
+          return new PasswordAuthentication( getUser(), getPassword() );
+        }
+      };
+    }
     result = Session.getInstance( props, auth );
     
     return result;
