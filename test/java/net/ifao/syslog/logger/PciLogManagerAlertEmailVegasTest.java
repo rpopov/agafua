@@ -18,7 +18,7 @@ import junit.framework.TestCase;
  * Test a connection to a real host with syslog configured for vegas project's purposes  
  * @author rpopov
  */
-public class PciLogManagerAlertSmtpVegasTest extends TestCase {
+public class PciLogManagerAlertEmailVegasTest extends TestCase {
 
   /**
    * Just lookup the loggers
@@ -28,10 +28,14 @@ public class PciLogManagerAlertSmtpVegasTest extends TestCase {
     Logger logger; 
     
     /// There must be no communication established
-    logger = Logger.getLogger("vegas.pci.logger.log.alert");
+    logger = Logger.getLogger("vegas.pci.logger.email");
     
-    logger.log(Level.INFO, "Test message1");
+    logger.log(Level.INFO, "Test message 1");
     
+    logger.log(Level.INFO, "Test message 2");
+    
+    logger.log(Level.INFO, "Test message 3");
+
     Thread.sleep( 10000 );
     
     // the root logger should be used and the client is not interrupted

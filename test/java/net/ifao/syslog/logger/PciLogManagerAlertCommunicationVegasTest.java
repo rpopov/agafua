@@ -28,9 +28,13 @@ public class PciLogManagerAlertCommunicationVegasTest extends TestCase {
     Logger logger; 
     
     /// There must be no communication established
-    logger = Logger.getLogger("vegas.pci.logger.email");
+    logger = Logger.getLogger("vegas.pci.logger.log.alert");
     
-    logger.log(Level.INFO, "Test message1");
+    logger.log(Level.INFO, "Test message 1");
+    
+    logger.log(Level.INFO, "Test message 2");
+    
+    logger.log(Level.INFO, "Test message 3");
     
     Thread.sleep( 10000 );
     
