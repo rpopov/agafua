@@ -109,6 +109,7 @@
        <batchtest>
          <fileset dir="${test.java}">
            <include name="**/*Test*.java"/>
+           <exclude name="**/*Wrong*.java"/>
          </fileset>           
        </batchtest>
      </junit> 

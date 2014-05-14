@@ -65,6 +65,7 @@ class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
     message = constructMessage( record );  
 
     os.write( message.getBytes(), 0, message.getLength() );
+    os.write('\n');
     os.flush();
   }
 

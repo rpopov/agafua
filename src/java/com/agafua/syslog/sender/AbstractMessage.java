@@ -10,7 +10,7 @@ abstract class AbstractMessage implements Message {
   private final LogRecord logRecord;
   
   private static final byte NON_ASCII_SYMBOL = (byte) '.';
-  private static final byte LF_SYMBOL = (byte) '\\';
+  private static final byte LF_SYMBOL = (byte) ' ';
   
   private final byte[] value;
   private int pos = 0;
@@ -73,21 +73,48 @@ abstract class AbstractMessage implements Message {
 
   protected void print(String s) {
     char c;
+    boolean lineSeparator;
     
+    lineSeparator = false;
   	for (int i = 0; i < s.length() && pos < value.length; i++) {
   		c = s.charAt(i);
   		
   		if (c >= 32 && c <= 126) {
-  			value[pos] = (byte) c;
-  		} else if (c == 10) {
-  			value[pos] = LF_SYMBOL;// LF_SYMBOL;
+  			value[pos++] = (byte) c;
+  			lineSeparator = false;
+  		} else if (c == 10 || c == 13) {
+  		  if ( !lineSeparator ) {
+          value[pos++] = LF_SYMBOL;  		    
+  		  }
+  		  lineSeparator = true;
   		} else {
-  			value[pos] = NON_ASCII_SYMBOL;
+  			value[pos++] = NON_ASCII_SYMBOL;
+        lineSeparator = false;
   		}
-  		pos++;
   	}
   }
 
+  /**
+   * Print only alpha-numeric characters up to max number 
+   * @param s
+   * @param max
+   */
+  protected void printAlphaNum(String s, final int max) {
+    char c;
+    final int start = pos;
+    
+    for (int i = 0; i < s.length() && pos < value.length && pos < start + max; i++) {
+      c = s.charAt(i);
+      
+      if (    c>='a' && c<='z'
+           || c>='A' && c<='Z'
+           || c>='0' && c<='9') {
+        value[pos++] = (byte) c;
+      }
+    }
+  }
+  
+  
   protected static String indent(String s, int requiredLength, char identChar) {
     while (s.length() < requiredLength) {
       s = identChar + s;

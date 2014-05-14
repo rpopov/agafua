@@ -204,12 +204,12 @@ public abstract class Configuration {
    * @return
    */
   private static String initProcessId() {
-    String processId;
+    String result;
     RuntimeMXBean bean;
     String jvmName;
     String pid;
     
-    processId = "-";
+    result = null;
     try {
       // This might not work on any operating system.
       // We return "-" of not successful.
@@ -219,13 +219,13 @@ public abstract class Configuration {
       pid = jvmName.split( "@" )[ 0 ];
   
       if ( pid != null && !pid.isEmpty() ) {
-        processId = pid;
+        result = pid;
       }
     } catch (Exception ex) {
-      System.err.print("Use default (-) process ID, because of: ");
+      System.err.print("Process ID detection caused:");
       ex.printStackTrace();
     }
-    return processId;
+    return result;
   }
 
 }

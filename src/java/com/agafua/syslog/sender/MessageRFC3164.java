@@ -38,12 +38,18 @@ class MessageRFC3164 extends AbstractMessage {
 	public MessageRFC3164(SyslogConfiguration configuration, LogRecord record, String messageId) {
 		super(configuration, record, messageId);
 		
-    print( calculatePriority( configuration ) ); 
+    print(calculatePriority( configuration )); 
     print(getTimestamp()); 
     print(" ");
     
     print(configuration.getLocalHostName());     
     print(" "); 
+    
+    printAlphaNum( configuration.getApplicationId(), 32 );
+    if ( configuration.getProcessId() != null) {
+      print( "["+configuration.getProcessId()+"]" );
+    }
+    print(":");
     
     print(getMessage());     
 		

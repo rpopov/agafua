@@ -36,7 +36,7 @@ class MessageRFC5424 extends AbstractMessage {
 	public MessageRFC5424(SyslogConfiguration configuration, LogRecord record, String messageId) {	  
 		super(configuration, record, messageId);
 		
-    print( calculatePriority( configuration ) ); // ABNF RFC5424: PRI
+    print(calculatePriority( configuration )); // ABNF RFC5424: PRI
     print("2"); // TODO ABNF RFC5424: VERSION
     print(" "); // ABNF RFC5424: SP
     
@@ -52,7 +52,11 @@ class MessageRFC5424 extends AbstractMessage {
     
     print(" "); // ABNF RFC5424: SP
     
-    print(configuration.getProcessId()); // ABNF RFC5424: PROCID
+    if ( configuration.getProcessId() != null ) {
+      print(configuration.getProcessId()); // ABNF RFC5424: PROCID
+    } else {
+      print( "-" );
+    }
     
     print(" "); // ABNF RFC5424: SP
     
