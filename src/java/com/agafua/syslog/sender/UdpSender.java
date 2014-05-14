@@ -28,7 +28,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.logging.LogRecord;
 
-import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.internal.NetworkSender;
 import net.ifao.pci.logging.syslog.SyslogConfiguration;
 
 /**
@@ -44,24 +44,24 @@ class UdpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
   }
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#establishConnection()
+   * @see net.ifao.pci.logging.internal.NetworkSender#establishConnection()
    */
   protected void establishConnection() throws IOException {
     if ( socket == null ) {
-      address = InetAddress.getByName( getConfiguration().getRemoteHostName() );
+      address = InetAddress.getByName( getConfiguration().getHost() );
       socket = new DatagramSocket();
     }
   }
 
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#sendMessage(LogRecord)
+   * @see net.ifao.pci.logging.internal.NetworkSender#sendMessage(LogRecord)
    */
   protected void sendMessage(LogRecord record) throws IOException {
     DatagramPacket packet;
     Message message;
     
-    message = getConfiguration().constructMessage( record, "-" );  
+    message = constructMessage( record );  
     
     packet = new DatagramPacket( message.getBytes(), 
                                  message.getLength(), 
@@ -72,7 +72,7 @@ class UdpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
 
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#releaseResources()
+   * @see net.ifao.pci.logging.internal.NetworkSender#releaseResources()
    */
   protected void releaseResources() {
     if ( socket != null ) {
@@ -86,9 +86,25 @@ class UdpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
   
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#describeConnection()
+   * @see net.ifao.pci.logging.internal.NetworkSender#describeConnection()
    */
   protected String describeConnection() {
-    return "UDP connection to host:"+getConfiguration().getRemoteHostName()+" and port:"+getConfiguration().getPort();
+    return "UDP connection to host:"+getConfiguration().getHost()+" and port:"+getConfiguration().getPort();
   }  
+
+  /**
+   * @param record
+   * @return
+   */
+  private Message constructMessage(LogRecord record) {
+    return getConfiguration().constructMessage( record, "-" );
+  }
+
+
+  /**
+   * @see net.ifao.pci.logging.internal.NetworkSender#formatPrintable(java.util.logging.LogRecord)
+   */
+  protected String formatPrintable(LogRecord record) {
+    return constructMessage( record ).toString();
+  }
 }

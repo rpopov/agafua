@@ -5,7 +5,7 @@ import java.util.logging.LogRecord;
 
 import net.ifao.pci.logging.syslog.SyslogConfiguration;
 
-public abstract class AbstractMessage implements Message {
+abstract class AbstractMessage implements Message {
 
   private final LogRecord logRecord;
   

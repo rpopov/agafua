@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * </ul> 
  * Usage:
  *   add in the java command line add the parameter
- *   <b>-Djava.util.logging.manager=net.ifao.syslog.logger.PciLogManager</b>
+ *   <b>-Djava.util.logging.manager=net.ifao.pci.logging.PciLogManager</b>
  * </pre>  
  * @see net.ifao.pci.logging.syslog.SyslogHandlerBean
  * @author rpopov

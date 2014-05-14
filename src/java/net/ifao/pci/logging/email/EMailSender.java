@@ -1,13 +1,11 @@
 /*
  * Copyright (c) i:FAO AG 2014. All Rights Reserved.
  *
- * This SOURCE CODE FILE, which has been provided by i:FAO AG as part
- * of a product of i:FAO AG for use ONLY by licensed users of the product,
- * includes CONFIDENTIAL and PROPRIETARY information.
+ * This SOURCE CODE FILE is provided under Eclipse Public License 1.0
  * 
  * Created on 13.05.2014
  */
-package net.ifao.pci.logging.smtp;
+package net.ifao.pci.logging.email;
 
 import java.io.IOException;
 import java.util.Date;
@@ -17,7 +15,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.MimeMessage;
 
-import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.internal.NetworkSender;
 
 import com.agafua.syslog.sender.Connector;
 
@@ -25,7 +23,7 @@ import com.agafua.syslog.sender.Connector;
  * Asynchronously send the logged records as email messages 
  * @author rpopov
  */
-public class SmtpSender extends NetworkSender<SmtpConfiguration> {
+class EMailSender extends NetworkSender<EMailConfiguration> {
 
   /**
    * Cache the mail session
@@ -35,7 +33,7 @@ public class SmtpSender extends NetworkSender<SmtpConfiguration> {
   /**
    * @param connector
    */
-  public SmtpSender(Connector<SmtpConfiguration> connector) {
+  public EMailSender(Connector<EMailConfiguration> connector) {
     super( connector );
   }
 
@@ -48,7 +46,7 @@ public class SmtpSender extends NetworkSender<SmtpConfiguration> {
 
   /**
    * Send the record as an email
-   * @see net.ifao.pci.logging.NetworkSender#sendMessage(java.util.logging.LogRecord)
+   * @see net.ifao.pci.logging.internal.NetworkSender#sendMessage(java.util.logging.LogRecord)
    */
   protected void sendMessage(LogRecord record) throws IOException {
     MimeMessage message; 
@@ -68,18 +66,26 @@ public class SmtpSender extends NetworkSender<SmtpConfiguration> {
 
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#releaseResources()
+   * @see net.ifao.pci.logging.internal.NetworkSender#releaseResources()
    */
   protected void releaseResources() {
     // no need of releasing the session
   }
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#describeConnection()
+   * @see net.ifao.pci.logging.internal.NetworkSender#describeConnection()
    */
   protected String describeConnection() {
-    return  "Sending email to host:"+getConfiguration().getRemoteHostName()
+    return  "Sending email to host:"+getConfiguration().getHost()
            +" and port:"+ getConfiguration().getPort()
            +" using protocol:"+getConfiguration().getProtocol();
+  }
+
+
+  /**
+   * @see net.ifao.pci.logging.internal.NetworkSender#formatPrintable(java.util.logging.LogRecord)
+   */
+  protected String formatPrintable(LogRecord record) {
+    return getConfiguration().getFormatter().format( record );
   }
 }

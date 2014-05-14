@@ -1,8 +1,15 @@
+/*
+ * Copyright (c) i:FAO AG 2014. All Rights Reserved.
+ *
+ * This SOURCE CODE FILE is provided under Eclipse Public License 1.0
+ * 
+ * Created on 09.05.2014
+ */
 package net.ifao.pci.logging.syslog;
 
 import java.util.logging.LogRecord;
 
-import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.internal.NetworkSender;
 
 import com.agafua.syslog.sender.Configuration;
 import com.agafua.syslog.sender.Connector;
@@ -14,6 +21,7 @@ import com.agafua.syslog.sender.Transport;
 /**
  * All configuration parameter for the Syslog connectivity.
  * Call its set* to fill it in before use.
+ * Based on the original configuration class by Oliver Probst
  */
 public class SyslogConfiguration extends Configuration {
 
@@ -30,7 +38,7 @@ public class SyslogConfiguration extends Configuration {
   /**
    * Not null 
    */
-  private Transport transport = Transport.UDP;
+  private Transport transport = Transport.TCP;
   
   /**
    * Not null 

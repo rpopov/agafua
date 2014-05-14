@@ -27,7 +27,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.logging.LogRecord;
 
-import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.internal.NetworkSender;
 import net.ifao.pci.logging.syslog.SyslogConfiguration;
 
 /*
@@ -45,11 +45,11 @@ class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
 
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#establishConnection()
+   * @see net.ifao.pci.logging.internal.NetworkSender#establishConnection()
    */
   protected void establishConnection() throws IOException {
     if ( os == null ) {
-      socket = new Socket( getConfiguration().getRemoteHostName(), 
+      socket = new Socket( getConfiguration().getHost(), 
                            getConfiguration().getPort() );
       os = socket.getOutputStream();
     } 
@@ -57,12 +57,12 @@ class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
 
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#sendMessage(LogRecord)
+   * @see net.ifao.pci.logging.internal.NetworkSender#sendMessage(LogRecord)
    */
   protected void sendMessage(LogRecord record) throws IOException {
     Message message;
     
-    message = getConfiguration().constructMessage( record, "-" );  
+    message = constructMessage( record );  
 
     os.write( message.getBytes(), 0, message.getLength() );
     os.flush();
@@ -70,7 +70,7 @@ class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
 
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#releaseResources()
+   * @see net.ifao.pci.logging.internal.NetworkSender#releaseResources()
    */
   protected void releaseResources() {
     if ( os != null ) {
@@ -91,9 +91,25 @@ class TcpSender extends NetworkSender<SyslogConfiguration> implements Runnable {
 
 
   /**
-   * @see net.ifao.pci.logging.NetworkSender#describeConnection()
+   * @see net.ifao.pci.logging.internal.NetworkSender#describeConnection()
    */
   protected String describeConnection() {
-    return "TCP connection to host:"+getConfiguration().getRemoteHostName()+" and port:"+ getConfiguration().getPort();
+    return "TCP connection to host:"+getConfiguration().getHost()+" and port:"+ getConfiguration().getPort();
+  }
+
+  /**
+   * @param record
+   * @return
+   */
+  private Message constructMessage(LogRecord record) {
+    return getConfiguration().constructMessage( record, "-" );
+  }
+
+
+  /**
+   * @see net.ifao.pci.logging.internal.NetworkSender#formatPrintable(java.util.logging.LogRecord)
+   */
+  protected String formatPrintable(LogRecord record) {
+    return constructMessage( record ).toString();
   }
 }

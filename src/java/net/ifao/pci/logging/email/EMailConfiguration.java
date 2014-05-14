@@ -1,4 +1,11 @@
-package net.ifao.pci.logging.smtp;
+/*
+ * Copyright (c) i:FAO AG 2014. All Rights Reserved.
+ *
+ * This SOURCE CODE FILE is provided under Eclipse Public License 1.0
+ * 
+ * Created on 12.05.2014
+ */
+package net.ifao.pci.logging.email;
 
 import java.util.Properties;
 
@@ -10,7 +17,7 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import net.ifao.pci.logging.NetworkSender;
+import net.ifao.pci.logging.internal.NetworkSender;
 
 import com.agafua.syslog.sender.Configuration;
 import com.agafua.syslog.sender.Connector;
@@ -20,16 +27,20 @@ import com.agafua.syslog.sender.Connector;
  * The emails are sent from &lt;application id&gt;@&lt;local host name&gt;
  * Allows providing as system properties from the command line, any parameters to the 
  * underlying Java Mail component, as of http://www.oracle.com/technetwork/java/javamail/index.html
- * The property values provided in the configuration file override those provided as system properties. 
+ * The property values provided in the configuration file override those provided as system properties:<ul>
+ * <li> <b>remoteHostName</b> configuration property overrides the  <b>mail.host</b> system property, if ones specified
+ * <li> <b>smtpUsername</b> configuration property overrides the <b>mail.user</b> system property, if ones provided
+ * <li> <b>protocol</b> configuration property overrides <b>mail.transport.protocol</b> system property  
+ * </ul>
  */
-public class SmtpConfiguration extends Configuration {
+public class EMailConfiguration extends Configuration {
   private String to;
   private String subject;
   
   private String protocol = "smtp";
 
-  private String smtpUsername;
-  private String smtpPassword;
+  private String user;
+  private String password;
 
 
   /**
@@ -43,8 +54,8 @@ public class SmtpConfiguration extends Configuration {
     
     props = new Properties( System.getProperties() );
 
-    put( props, "mail.host", getRemoteHostName() );
-    put( props, "mail.user", getSmtpUsername() );
+    put( props, "mail.host", getHost() );
+    put( props, "mail.user", getUser() );
     put( props, "mail.transport.protocol", getProtocol() );
 
     auth = new javax.mail.Authenticator() {
@@ -52,7 +63,7 @@ public class SmtpConfiguration extends Configuration {
        * @see javax.mail.Authenticator#getPasswordAuthentication()
        */
       protected PasswordAuthentication getPasswordAuthentication() {
-        return new PasswordAuthentication( getSmtpUsername(), getSmtpPassword() );
+        return new PasswordAuthentication( getUser(), getPassword() );
       }
     };
     result = Session.getInstance( props, auth );
@@ -100,7 +111,7 @@ public class SmtpConfiguration extends Configuration {
    * @see com.agafua.syslog.sender.BasicConfiguration#constructSender(Connector<C>)
    */
   protected <C extends Configuration> NetworkSender<C> constructSender(Connector<C> connector) {
-    return (NetworkSender<C>) new SmtpSender( (Connector<SmtpConfiguration>) connector );
+    return (NetworkSender<C>) new EMailSender( (Connector<EMailConfiguration>) connector );
   }
 
 
@@ -142,37 +153,37 @@ public class SmtpConfiguration extends Configuration {
 
 
   /**
-   * @see #smtpUsername
+   * @see #user
    */
-  public final String getSmtpUsername() {
-    return smtpUsername;
+  public final String getUser() {
+    return user;
   }
 
 
   /**
-   * @see #smtpUsername
+   * @see #user
    */
-  public final void setSmtpUsername(String smtpUsername) {
+  public final void setUser(String smtpUsername) {
     if ( smtpUsername != null && !smtpUsername.isEmpty() ) {
-      this.smtpUsername = smtpUsername;
+      this.user = smtpUsername;
     }
   }
 
 
   /**
-   * @see #smtpPassword
+   * @see #password
    */
-  public final String getSmtpPassword() {
-    return smtpPassword;
+  public final String getPassword() {
+    return password;
   }
 
 
   /**
-   * @see #smtpPassword
+   * @see #password
    */
-  public final void setSmtpPassword(String smtpPassword) {
+  public final void setPassword(String smtpPassword) {
     if ( smtpPassword != null && !smtpPassword.isEmpty() ) {
-      this.smtpPassword = smtpPassword;
+      this.password = smtpPassword;
     }
   }
 
