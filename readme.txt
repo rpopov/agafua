@@ -92,7 +92,7 @@ syslog.user.applicationId = test-application
 # Allowed values of net.ifao.pci.logging.syslog.SyslogHandlerBean.facility are: KERN, USER, MAIL, DAEMON, AUTH, SYSLOG, LPR, NEWS, UUCP, CRON, SECURITY, FTP, NTP, LOGAUDIT, LOGALERT, CLOCK, LOCAL0, LOCAL1, LOCAL2, LOCAL3, LOCAL4, LOCAL5, LOCAL6, LOCAL7
 syslog.user.facility = USER
 # Allowed values of net.ifao.pci.logging.syslog.SyslogHandlerBean.rfc are: RFC3164, RFC5424 (default)
-
+syslog.user.rfc = RFC3164
 
 syslog.auth.class = net.ifao.pci.logging.syslog.SyslogHandlerBean 
 syslog.auth.transport = TCP
@@ -100,6 +100,7 @@ syslog.auth.host = localhost
 syslog.auth.port = 514
 syslog.auth.applicationId = test-application
 syslog.auth.facility = AUTH
+syslog.auth.rfc = RFC3164
 
 
 syslog.security.class = net.ifao.pci.logging.syslog.SyslogHandlerBean
@@ -108,6 +109,7 @@ syslog.security.host = localhost
 syslog.security.port = 514
 syslog.security.applicationId = test-application
 syslog.security.facility = SECURITY
+syslog.security.rfc = RFC3164
 
 
 syslog.log.audit.class = net.ifao.pci.logging.syslog.SyslogHandlerBean
@@ -116,6 +118,7 @@ syslog.log.audit.host = localhost
 syslog.log.audit.port = 514
 syslog.log.audit.applicationId = test-application
 syslog.log.audit.facility = LOGAUDIT
+syslog.log.audit.rfc = RFC3164
 
 
 syslog.log.alert.class = net.ifao.pci.logging.syslog.SyslogHandlerBean
@@ -124,6 +127,7 @@ syslog.log.alert.host = localhost
 syslog.log.alert.port = 514
 syslog.log.alert.applicationId = test-application
 syslog.log.alert.facility = LOGALERT
+syslog.log.alert.rfc = RFC3164
 
 email.alert.class = net.ifao.pci.logging.email.EMailHandlerBean
 email.alert.applicationId = <unique application name to use in FROM:>
@@ -133,6 +137,7 @@ email.alert.port = 465
 email.alert.subject = 
 email.alert.to = <to whom to deliver the messages>
 email.alert.user = <set the user to log in the email server. default: applicationId>
+email.alert.rfc = RFC3164
 
 
 3. Use the specific loggers in the Java application to report specific events to, by using their pure names:
