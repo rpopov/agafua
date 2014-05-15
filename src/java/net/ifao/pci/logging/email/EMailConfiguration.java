@@ -8,6 +8,7 @@
 package net.ifao.pci.logging.email;
 
 import java.util.Properties;
+import java.util.logging.SimpleFormatter;
 
 import javax.mail.Authenticator;
 import javax.mail.Message;
@@ -43,6 +44,13 @@ public class EMailConfiguration extends Configuration {
   private String user;
   private String password;
 
+
+  /**
+   * 
+   */
+  public EMailConfiguration() {
+    setFormatter( new SimpleFormatter() );
+  }
 
   /**
    * Establish a new mail session though Java Mail API

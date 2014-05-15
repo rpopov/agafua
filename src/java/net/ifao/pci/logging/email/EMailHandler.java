@@ -44,10 +44,7 @@ public class EMailHandler extends AsynchronousHandler<EMailConfiguration> {
     super( new EMailConfiguration() );
     LogManager logManager;    
     
-    setFormatter( new SimpleFormatter() );
-
-    logManager = LogManager.getLogManager();
-    
+    logManager = LogManager.getLogManager();    
     try {
       getConfiguration().setApplicationId( logManager.getProperty( this.getClass().getName()+"."+"applicationId" ) );
       parsePort(logManager);

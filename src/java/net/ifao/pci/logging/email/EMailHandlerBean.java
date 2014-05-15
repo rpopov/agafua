@@ -43,7 +43,6 @@ public class EMailHandlerBean extends AsynchronousHandlerBean<EMailConfiguration
 
   public EMailHandlerBean() {
     super( new EMailConfiguration() );
-    setFormatter( new SimpleFormatter() );
   }
   
   /**
